@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "strict": true,
+    "baseUrl": ".",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "types": ["vite/client", "@types/node"],
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "references": [],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json",
+    "vite.config.ts",
+    "./package.json"
+  ]
+}
