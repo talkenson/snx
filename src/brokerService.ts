@@ -8,12 +8,7 @@ import {
 } from '@/config/secrets'
 import { addBeforeExitHook } from '@/utils/beforeExitHook'
 import { logEvent } from '@/utils/logEvent'
-import {
-  BrokerPublish,
-  BrokerRequestPayload,
-  BrokerSubscription,
-} from '@/types'
-import { nanoid } from 'nanoid'
+import { BrokerPublish, BrokerSubscription } from '@/types'
 
 const createNATSConnection = async (): Promise<{
   publish: BrokerPublish
@@ -40,17 +35,6 @@ const createNATSConnection = async (): Promise<{
 
   const subscription = nc.subscribe(`${POKE_API_BROKER_PREFIX}.request`) // poke.api.request.CLIENT_ID
 
-  // Only logging purpose
-  const responseListenSub = nc.subscribe(`${POKE_API_BROKER_PREFIX}.response`) // poke.api.request.CLIENT_ID
-
-  ;(async () => {
-    for await (const m of responseListenSub) {
-      console.log(
-        `RESPONSE [${responseListenSub.getProcessed()}]: ${sc.decode(m.data)}`,
-      )
-    }
-  })()
-
   addBeforeExitHook(async () => {
     logEvent('Draining NATS queue...')
     await nc.drain() // like close, but will ensure that packages are received
@@ -68,17 +52,5 @@ const createNATSConnection = async (): Promise<{
 }
 
 const { publish, subscription } = await createNATSConnection()
-
-publish('poke.api.request', {
-  eventName: 'authentication/register',
-  hash: nanoid(10),
-  payload: { strategy: 'local', login: 'muss', password: 'test' },
-} as BrokerRequestPayload)
-
-publish('poke.api.request', {
-  eventName: 'authentication/auth',
-  hash: nanoid(10),
-  payload: { strategy: 'local', login: 'muss', password: 'test' },
-} as BrokerRequestPayload)
 
 export { publish, subscription }
