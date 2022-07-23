@@ -5,6 +5,7 @@ import { Router } from 'express'
 import { registerRestControllers } from '@/common/registerRestControllers'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
 import { User } from '@/models/User.model'
+import { GraphItem } from '@/common/types/GraphItem.model'
 
 export const createControllerRegistrar = (
   controllers: Controller[],
@@ -12,6 +13,8 @@ export const createControllerRegistrar = (
   registerAllEventControllers: (io: Server) => void
   registerAllRestControllers: (router: Router) => void
 } => {
+  const graph: GraphItem[] = []
+
   const registerAllEventControllers = (io: Server) => {
     // auto registration socket routes for each client
     io.on('connection', socket => {
@@ -28,7 +31,9 @@ export const createControllerRegistrar = (
   }
 
   const registerAllRestControllers = (router: Router) => {
-    registerRestControllers(router)(controllers)
+    registerRestControllers(router)(controllers, graph)
+
+    console.log(graph)
   }
 
   return { registerAllEventControllers, registerAllRestControllers }

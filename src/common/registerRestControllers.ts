@@ -10,9 +10,12 @@ import {
 import { Router } from 'express'
 import { exists } from '@/utils/exists'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
+import { logEvent } from '@/utils/logEvent'
+import { GraphItem } from '@/common/types/GraphItem.model'
 
 export const registerRestControllers: RestControllerRegistrar =
-  (router: Router) => async (controllers: Controller[]) => {
+  (router: Router) =>
+  async (controllers: Controller[], graphBase: GraphItem[]) => {
     const restListenerMap: RestListenerMap = new Map()
 
     const createRestResolve = (res: RestResponse) => (result: any) =>
@@ -32,6 +35,14 @@ export const registerRestControllers: RestControllerRegistrar =
         handler: ListenerFunction,
         specificTransport?: PokeTransports[],
       ) => {
+        // Pushing to graph
+
+        graphBase.push({
+          scope: scope,
+          action: eventName,
+          transports: specificTransport || controllerTransport || ['ws'],
+        })
+
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setRestListener = () => {
@@ -92,20 +103,14 @@ export const registerRestControllers: RestControllerRegistrar =
       )
     })
 
-    console.log('Rest API', restListenerMap)
-
     /**
      * START Rest Registration Section
      */
 
-    const context: Pick<ControllerContext, 'transport'> = {
-      transport: 'rest',
-    }
-
     restListenerMap.forEach((listenerFn, eventName) => {
       router.post(`/${eventName}`, (req, res) => {
         return listenerFn({
-          ...context,
+          transport: 'rest',
           user: res.locals.user,
           event: eventName,
         })(res, req.body)

@@ -57,19 +57,16 @@ export const registerEventControllers: EventControllerRegistrar =
         }
 
         const setFallbackEventListener = () => {
-          eventListenerMap.set(
-            fullEventRouteName,
-            (context: ControllerContext) => (hash: string) => {
-              createSocketReject(
-                fullEventRouteName,
-                hash,
-              )({
-                status: 'Unreachable',
-                solution: 'ROLL_TO_REST',
-                handler: fullEventRouteName,
-              })
-            },
-          )
+          eventListenerMap.set(fullEventRouteName, () => (hash: string) => {
+            createSocketReject(
+              fullEventRouteName,
+              hash,
+            )({
+              status: 'Unreachable',
+              solution: 'ROLL_TO_REST',
+              handler: fullEventRouteName,
+            })
+          })
         }
 
         /**
@@ -101,21 +98,15 @@ export const registerEventControllers: EventControllerRegistrar =
       )
     })
 
-    console.log('Event Listeners', eventListenerMap)
-
     /**
      * START Socket Registration Section
      */
-
-    const context: Partial<Omit<ControllerContext, 'event'>> = {
-      transport: 'ws',
-    }
 
     eventListenerMap.forEach((listenerFn, eventName) => {
       socket.on(
         eventName,
         // @ts-ignore
-        listenerFn({ ...context, user: user, event: eventName }),
+        listenerFn({ transport: 'ws', user: user, event: eventName }),
       )
     })
 

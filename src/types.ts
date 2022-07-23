@@ -3,6 +3,7 @@ import { Socket } from 'socket.io'
 import { Response, Router } from 'express'
 import { User } from '@/models/User.model'
 import { CrudMethodName } from '@/base/types'
+import { GraphItem } from '@/common/types/GraphItem.model'
 
 export type EventName = string
 
@@ -40,7 +41,7 @@ export type EventControllerRegistrar = (
 
 export type RestControllerRegistrar = (
   router: Router,
-) => (controllers: Controller[]) => Promise<void>
+) => (controllers: Controller[], graph: GraphItem[]) => Promise<void>
 
 export type AddListenerFunction = <Props = any>(
   eventName: string,
