@@ -1,6 +1,6 @@
 const createBeforeExitHook = () => {
-  const callbackCollection: Array<() => void> = []
-  const addBeforeExitHook = (callback: () => any) => {
+  const callbackCollection: Array<() => any | Promise<any>> = []
+  const addBeforeExitHook = (callback: () => any | Promise<any>) => {
     const id = callbackCollection.push(callback)
     return () => {
       delete callbackCollection[id]

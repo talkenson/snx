@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 const DEFAULT_REFRESH_TOKEN_LENGTH = 64
 const DEFAULT_JWT_LIFETIME_SEC = 3600
+export const POKE_API_BROKER_PREFIX = 'poke.api'
 
 export const JWT_KEY = (() => {
   const envJwtKey = import.meta.env.VITE_JWT_KEY
@@ -38,4 +39,27 @@ export const JWT_LIFETIME_SEC = (() => {
   } else {
     return parsed || DEFAULT_JWT_LIFETIME_SEC
   }
+})()
+
+export const NATS_USE_FLAG = (() => {
+  const useNats = import.meta.env.VITE_USE_NATS
+  return useNats && useNats.length
+})()
+
+export const NATS_SERVER_ADDRESS = (() => {
+  const natsAddr = import.meta.env.VITE_NATS_SERVER
+  if (!natsAddr) {
+    console.warn('Environment VITE_NATS_SERVER key not found or invalid')
+    return undefined
+  } else {
+    return natsAddr
+  }
+})()
+
+export const NATS_SERVER_USER = (() => {
+  return import.meta.env.VITE_NATS_SERVER_USER
+})()
+
+export const NATS_SERVER_PASS = (() => {
+  return import.meta.env.VITE_NATS_SERVER_PASS
 })()

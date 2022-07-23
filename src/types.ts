@@ -1,9 +1,8 @@
-import { Server } from 'socket.io'
-import { Socket } from 'socket.io'
+import { Server, Socket } from 'socket.io'
 import { Response, Router } from 'express'
 import { User } from '@/models/User.model'
-import { CrudMethodName } from '@/base/types'
 import { GraphItem } from '@/common/types/GraphItem.model'
+import { Msg, Subscription } from 'nats'
 
 export type EventName = string
 
@@ -29,9 +28,16 @@ export type RestDrivenListenerFunction = (
   ...payload: any[]
 ) => ReturnType<ReturnType<ListenerFunction>>
 
-export type EventListenerMap = Map<EventName, EventDrivenListenerFunction>
+export type BrokerDrivenListenerFunction = (
+  context: ControllerContext,
+) => (
+  hash: string,
+  ...payload: any[]
+) => ReturnType<ReturnType<ListenerFunction>>
 
+export type EventListenerMap = Map<EventName, EventDrivenListenerFunction>
 export type RestListenerMap = Map<EventName, RestDrivenListenerFunction>
+export type BrokerListenerMap = Map<EventName, BrokerDrivenListenerFunction>
 
 export type EventControllerRegistrar = (
   io: Server,
@@ -42,6 +48,10 @@ export type EventControllerRegistrar = (
 export type RestControllerRegistrar = (
   router: Router,
 ) => (controllers: Controller[], graph: GraphItem[]) => Promise<void>
+
+export type BrokerControllerRegistrar = (
+  subscription: BrokerSubscription,
+) => (controllers: Controller[]) => Promise<void>
 
 export type AddListenerFunction = <Props = any>(
   eventName: string,
@@ -56,12 +66,14 @@ export type ControllerContext<T extends Record<string, any> = {}> = {
   transport: PokeTransports
 } & T
 
+export type InvalidationFunction = () => void
+
 export type ControllerRegisterer = (
   addListener: AddListenerFunction,
   helpers?: any,
 ) => InvalidationFunction | void
 
-export type PokeTransports = 'ws' | 'rest'
+export type PokeTransports = 'ws' | 'rest' | 'broker'
 
 export type Controller = {
   scope: string
@@ -70,4 +82,14 @@ export type Controller = {
   register: ControllerRegisterer
 }
 
-export type InvalidationFunction = () => void
+export type BrokerPublish = (channel: string, data: any) => void
+
+export type BrokerSubscription = Subscription
+
+export type BrokerMessage = Msg
+
+export type BrokerRequestPayload = {
+  eventName: EventName
+  hash: string
+  payload: any
+}

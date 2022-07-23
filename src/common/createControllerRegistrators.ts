@@ -1,17 +1,19 @@
-import { Controller } from '@/types'
 import { Server } from 'socket.io'
-import { registerEventControllers } from '@/common/registerEventControllers'
 import { Router } from 'express'
+import { registerEventControllers } from '@/common/registerEventControllers'
 import { registerRestControllers } from '@/common/registerRestControllers'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
+import { Controller, BrokerSubscription } from '@/types'
 import { User } from '@/models/User.model'
 import { GraphItem } from '@/common/types/GraphItem.model'
+import { registerBrokerControllers } from '@/common/registerBrokerControllers'
 
 export const createControllerRegistrar = (
   controllers: Controller[],
 ): {
   registerAllEventControllers: (io: Server) => void
   registerAllRestControllers: (router: Router) => void
+  registerAllBrokerControllers: (subscription: BrokerSubscription) => void
 } => {
   const graph: GraphItem[] = []
 
@@ -36,5 +38,13 @@ export const createControllerRegistrar = (
     console.log(graph)
   }
 
-  return { registerAllEventControllers, registerAllRestControllers }
+  const registerAllBrokerControllers = (subscription: BrokerSubscription) => {
+    registerBrokerControllers(subscription)(controllers)
+  }
+
+  return {
+    registerAllEventControllers,
+    registerAllRestControllers,
+    registerAllBrokerControllers,
+  }
 }

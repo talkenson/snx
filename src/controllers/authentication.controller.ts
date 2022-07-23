@@ -69,7 +69,7 @@ export const registerAuthenticateController: Controller = createController({
 
     addListener(
       'register',
-      (resolve, reject) => (payload: RegisterCredentials) => {
+      (resolve, reject, context) => (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
           if (!exists(payload.login) || !exists(payload.password))
             return reject({ reason: 'BAD_CREDENTIALS' })
@@ -104,6 +104,7 @@ export const registerAuthenticateController: Controller = createController({
           })
         }
       },
+      ['ws', 'rest', 'broker'],
     )
   },
 })

@@ -5,8 +5,11 @@ import { logEvent } from '@/utils/logEvent'
 
 logEvent('Creating registration handles...')
 
-export const { registerAllEventControllers, registerAllRestControllers } =
-  createControllerRegistrar([
-    registerAuthenticateController,
-    registerWallController,
-  ])
+export const {
+  registerAllEventControllers,
+  registerAllRestControllers,
+  registerAllBrokerControllers,
+} = createControllerRegistrar([
+  registerAuthenticateController,
+  registerWallController,
+])

@@ -67,7 +67,7 @@ export const registerRestControllers: RestControllerRegistrar =
             context => res =>
               res.json({
                 status: 'Unreachable',
-                solution: 'ROLL_TO_WS',
+                solution: 'TRY_OTHER_TRANSPORT',
                 handler: fullEventRouteName,
               }),
           )

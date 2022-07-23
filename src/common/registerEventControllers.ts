@@ -63,7 +63,7 @@ export const registerEventControllers: EventControllerRegistrar =
               hash,
             )({
               status: 'Unreachable',
-              solution: 'ROLL_TO_REST',
+              solution: 'TRY_OTHER_TRANSPORT',
               handler: fullEventRouteName,
             })
           })

@@ -3,12 +3,14 @@ import { app } from '@/rest'
 import {
   registerAllRestControllers,
   registerAllEventControllers,
+  registerAllBrokerControllers,
 } from '@/listeners'
 import { Router } from 'express'
 import { callbackCollection } from '@/utils/beforeExitHook'
 import { authenticationExpressMiddleware } from '@/utils/authentication/authenticationMiddleware'
 import { httpServer, ioServer } from '@/servers'
 import { logEvent } from '@/utils/logEvent'
+import { subscription } from './brokerService'
 
 const PORT = parseInt(import.meta.env.VITE_PORT || '3071')
 const HOST = import.meta.env.VITE_HOST || '0.0.0.0'
@@ -21,6 +23,8 @@ logEvent('Registering REST endpoints...')
 registerAllRestControllers(router)
 logEvent('Registering WS wrapper listener...')
 registerAllEventControllers(ioServer)
+logEvent('Registering NATS listener...')
+registerAllBrokerControllers(subscription)
 
 app.use(API_BASE_URL, authenticationExpressMiddleware)
 app.use(API_BASE_URL, router)
@@ -32,10 +36,9 @@ const listener = httpServer.listen(PORT, HOST, () => {
   )
 })
 
-process.on('SIGINT', () =>
-  listener.close(() => {
-    logEvent('Forced stopping. Calling exit hooks...')
-    callbackCollection.forEach(f => f())
-    process.exit()
-  }),
-)
+process.on('SIGINT', async () => {
+  logEvent('Forced stopping. Calling exit hooks...')
+  await listener.close()
+  await Promise.all(callbackCollection.map(f => f()))
+  process.exit()
+})
