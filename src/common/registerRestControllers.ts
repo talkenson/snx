@@ -46,6 +46,8 @@ export const registerRestControllers: RestControllerRegistrar =
           action: eventName,
           transports: metadata.transports || controllerTransport || ['ws'],
           schema: metadata.schema,
+          authRequired: !!authRequired,
+          description: metadata.description,
         })
 
         const fullEventRouteName = `${scope}/${eventName}`
@@ -61,7 +63,10 @@ export const registerRestControllers: RestControllerRegistrar =
                     createRestReject(res),
                     context,
                   )(...params)
-                return handlerRestrictUnauthorized(createRestReject(res))
+                return handlerRestrictUnauthorized(
+                  createRestReject(res),
+                  context,
+                )
               },
           )
         }
@@ -117,6 +122,7 @@ export const registerRestControllers: RestControllerRegistrar =
         return listenerFn({
           transport: 'rest',
           user: res.locals.user,
+          clientId: res.locals.clientId,
           event: eventName,
         })(res, req.body)
       })

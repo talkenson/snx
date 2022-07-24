@@ -10,6 +10,7 @@ export type ListenerMetadata = {
   eventName: EventName
   transports?: PokeTransports[]
   schema?: unknown
+  description?: string
 }
 
 export type AddListenerFirstArgument = EventName | ListenerMetadata
@@ -47,10 +48,15 @@ export type EventListenerMap = Map<EventName, EventDrivenListenerFunction>
 export type RestListenerMap = Map<EventName, RestDrivenListenerFunction>
 export type BrokerListenerMap = Map<EventName, BrokerDrivenListenerFunction>
 
+export type ForeignContext = {
+  user?: User
+  clientId: string
+}
+
 export type EventControllerRegistrar = (
   io: Server,
   socket: Socket,
-  user?: User,
+  foreignContext: ForeignContext,
 ) => (controllers: Controller[]) => Promise<void>
 
 export type RestControllerRegistrar = (
@@ -73,6 +79,7 @@ export type ControllerContext<
   event: string
   authRequired?: boolean
   transport: PokeTransports
+  clientId: string
 } & T
 
 export type InvalidationFunction = () => void

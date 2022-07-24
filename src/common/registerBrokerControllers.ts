@@ -128,6 +128,7 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         listenerFn({
           transport: 'broker',
           user: {} as User,
+          clientId: 'broker',
           event: payload.eventName,
         })(payload.hash, payload.payload)
       } else {

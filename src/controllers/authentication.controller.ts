@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import { nanoid } from 'nanoid'
 import { createController } from '@/common/createController'
+import { getClientId } from '@/common/getClientId'
 import {
   AuthCredentials,
   AuthStrategy,
@@ -25,6 +26,8 @@ export const registerAuthenticateController: Controller = createController({
     addListener(
       {
         eventName: 'auth',
+        description:
+          'Authentication with login/pass pair, or session prolongation with old AccessToken and its RefreshToken',
       },
       (resolve, reject) => (payload: AuthCredentials) => {
         if (payload.strategy === AuthStrategy.Local) {
@@ -36,9 +39,11 @@ export const registerAuthenticateController: Controller = createController({
           )
           if (!exists(auth)) return reject({ reason: 'USER_NOT_FOUND' })
 
+          // No ClientID check in auth, because we anyway must give new AccessToken
+
           bcrypt.compare(payload.password, auth.password, (err, result) => {
             if (result) {
-              return resolve(issueNewToken(auth))
+              return resolve(issueNewToken(auth, payload.clientId))
             } else {
               return reject({ reason: 'BAD_CREDENTIALS' })
             }
@@ -51,20 +56,25 @@ export const registerAuthenticateController: Controller = createController({
 
           const jwtBody = extractJwtInfo(payload.oldAccessToken)
 
-          const user =
+          const context =
             jwtBody && typeof jwtBody !== 'string'
               ? authenticatePayload(jwtBody)
               : undefined
 
-          if (!exists(user))
+          if (!exists(context) || !exists(context?.user))
             return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
 
-          const auth = authenticationStore.get(user.userId)
+          const auth = authenticationStore.get(context.user.userId)
 
-          if (!exists(auth) || auth.refreshToken !== payload.refreshToken)
+          if (
+            !exists(auth) ||
+            !auth.refreshChain[getClientId(context.clientId)] ||
+            auth.refreshChain[getClientId(context.clientId)].token !==
+              payload.refreshToken
+          )
             return reject({ reason: 'INVALID_REFRESH_TOKEN' })
 
-          return resolve(issueNewToken(auth))
+          return resolve(issueNewToken(auth, context.clientId))
         } else {
           return reject({
             reason: 'UNSUPPORTED_STRATEGY',
@@ -77,6 +87,7 @@ export const registerAuthenticateController: Controller = createController({
       {
         eventName: 'register',
         transports: ['ws', 'rest', 'broker'],
+        description: 'Registration with login/pass pair',
       },
       (resolve, reject, context) => (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
@@ -98,14 +109,18 @@ export const registerAuthenticateController: Controller = createController({
             const auth = authenticationStore.create({
               login: payload.login,
               password: hash,
-              refreshToken: nanoid(REFRESH_TOKEN_LENGTH),
+              refreshChain: {
+                [getClientId(payload.clientId)]: {
+                  token: nanoid(REFRESH_TOKEN_LENGTH),
+                },
+              },
             })
             const user = userStore.insert(auth.userId, {
               name: createRandomUserName(),
               userId: auth.userId,
             })
 
-            return resolve(issueNewToken(auth))
+            return resolve(issueNewToken(auth, payload.clientId))
           })
         } else {
           return reject({

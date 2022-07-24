@@ -1,17 +1,18 @@
 import { PokeTransports } from '@/types'
 
+type ClientId = string
+
 export type Credentials = {
   userId: number
   login: string
   password: string // Hashed
-  refreshToken: string
+  refreshChain: Record<ClientId, RefreshTokenChain>
 }
 
 export type RefreshTokenChain = {
   token: string
-  transport: PokeTransports
-  deviceId?: string
-  clientId: string
+  transport?: PokeTransports
+  clientId?: string
 }
 
 export const credentialsPrimaryKey = 'userId'

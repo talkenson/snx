@@ -7,6 +7,7 @@ import { GraphItem } from '@/common/types/GraphItem.model'
 import { User } from '@/models/User.model'
 import { Controller, BrokerSubscription } from '@/types'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
+import { createGraph } from '@/utils/graph/createGraph'
 
 export const createControllerRegistrar = (
   controllers: Controller[],
@@ -22,20 +23,18 @@ export const createControllerRegistrar = (
     io.on('connection', socket => {
       authenticationSocketMiddleware(
         socket.client.request.headers.authorization,
-      ).then(user =>
-        registerEventControllers(
-          io,
-          socket,
-          user as User | undefined,
-        )(controllers),
+      ).then(context =>
+        registerEventControllers(io, socket, context)(controllers),
       )
     })
   }
 
   const registerAllRestControllers = (router: Router) => {
     registerRestControllers(router)(controllers, graph)
-
-    console.log(graph)
+    const schema = createGraph(graph)
+    router.get('/', (req, res) => {
+      res.json({ schema })
+    })
   }
 
   const registerAllBrokerControllers = (subscription: BrokerSubscription) => {

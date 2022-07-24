@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid'
 const DEFAULT_REFRESH_TOKEN_LENGTH = 64
 const DEFAULT_JWT_LIFETIME_SEC = 3600
 const DEFAULT_JWT_ISSUER = 'poke-default'
+const DEFAULT_CLIENT_ID = 'default'
 export const POKE_API_BROKER_PREFIX = 'poke.api'
 
 export const JWT_KEY = (() => {
@@ -52,6 +53,14 @@ export const JWT_LIFETIME_SEC = (() => {
   } else {
     return parsed || DEFAULT_JWT_LIFETIME_SEC
   }
+})()
+
+export const CONTEXT_FALLBACK_CLIENT_ID = (() => {
+  const fallbackClientId = import.meta.env.VITE_FALLBACK_CLIENT_ID
+  if (!fallbackClientId) {
+    return DEFAULT_CLIENT_ID
+  }
+  return fallbackClientId
 })()
 
 export const NATS_USE_FLAG = (() => {

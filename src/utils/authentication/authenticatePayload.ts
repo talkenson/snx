@@ -1,18 +1,16 @@
 import jwt from 'jsonwebtoken'
+import { getClientId } from '@/common/getClientId'
 import { JWT_KEY_ISSUER } from '@/config/secrets'
-import { User } from '@/models/User.model'
 import userStore from '@/store/user.store'
+import { ForeignContext } from '@/types'
 import { exists } from '@/utils/exists'
 
 export const authenticatePayload = (
   payload: jwt.JwtPayload,
-): User | undefined => {
-  const { userId, iss } = payload
+): ForeignContext => {
+  const { userId, clientId, iss } = payload
   if (!exists(userId) || !exists(iss) || iss !== JWT_KEY_ISSUER)
-    return undefined
+    return { clientId }
   const predictableUser = userStore.get(userId)
-  if (exists(predictableUser)) {
-    return predictableUser
-  }
-  return undefined
+  return { user: predictableUser, clientId: getClientId(clientId) }
 }

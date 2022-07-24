@@ -18,6 +18,7 @@ export type AuthCredentials<S extends AuthStrategy = AuthStrategy> =
         strategy: S
         login: string
         password: string
+        clientId?: string
       }
     : S extends AuthStrategy.External
     ? {
@@ -45,6 +46,7 @@ export type RegisterCredentials<S extends RegisterStrategy = RegisterStrategy> =
         strategy: S
         login: string
         password: string
+        clientId?: string
       }
     : S extends RegisterStrategy.VK
     ? {

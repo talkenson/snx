@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_JWT_KEY_ISSUER: string
   readonly VITE_API_BASE_URL: string
   readonly VITE_REFRESH_TOKEN_LENGTH: string
+  readonly VITE_FALLBACK_CLIENT_ID: string
   readonly VITE_JWT_LIFETIME_SEC: string
   readonly VITE_USE_NATS: string
   readonly VITE_NATS_SERVER: string

@@ -7,16 +7,15 @@ import {
   ControllerContext,
   ListenerFunction,
   EventListenerMap,
-  RestResponse,
   PokeTransports,
-  RestListenerMap,
   EventControllerRegistrar,
   AddListenerFirstArgument,
 } from '@/types'
 import { exists } from '@/utils/exists'
 
 export const registerEventControllers: EventControllerRegistrar =
-  (io: Server, socket: Socket, user) => async (controllers: Controller[]) => {
+  (io: Server, socket: Socket, { user, clientId }) =>
+  async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
 
     const createSocketResolve =
@@ -109,7 +108,12 @@ export const registerEventControllers: EventControllerRegistrar =
     eventListenerMap.forEach((listenerFn, eventName) => {
       socket.on(
         eventName,
-        listenerFn({ transport: 'ws', user: user, event: eventName }),
+        listenerFn({
+          transport: 'ws',
+          user: user,
+          clientId: clientId,
+          event: eventName,
+        }),
       )
     })
 

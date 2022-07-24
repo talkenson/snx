@@ -1,3 +1,4 @@
 export const handlerRestrictUnauthorized = (
   reject: (...reason: any[]) => any,
-) => reject({ reason: 'UNAUTHORIZED' })
+  context?: any,
+) => reject({ reason: 'UNAUTHORIZED', ...context })
