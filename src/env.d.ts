@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_PORT: string
   readonly VITE_SCHEMA: string
   readonly VITE_JWT_KEY: string
+  readonly VITE_JWT_KEY_ISSUER: string
   readonly VITE_API_BASE_URL: string
   readonly VITE_REFRESH_TOKEN_LENGTH: string
   readonly VITE_JWT_LIFETIME_SEC: string

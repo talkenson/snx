@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid'
 import { Credentials } from '@/common/types/Credentials.model'
 import {
   JWT_KEY,
+  JWT_KEY_ISSUER,
   JWT_LIFETIME_SEC,
   REFRESH_TOKEN_LENGTH,
 } from '@/config/secrets'
@@ -26,6 +27,7 @@ export const issueNewToken = (
     login: auth.login,
     token: jwt.sign({ userId: auth.userId }, JWT_KEY, {
       expiresIn: JWT_LIFETIME_SEC,
+      issuer: JWT_KEY_ISSUER,
     }),
     refreshToken: actualRefreshToken,
   }

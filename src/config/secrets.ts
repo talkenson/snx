@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 const DEFAULT_REFRESH_TOKEN_LENGTH = 64
 const DEFAULT_JWT_LIFETIME_SEC = 3600
+const DEFAULT_JWT_ISSUER = 'poke-default'
 export const POKE_API_BROKER_PREFIX = 'poke.api'
 
 export const JWT_KEY = (() => {
@@ -11,6 +12,18 @@ export const JWT_KEY = (() => {
   } else {
     return envJwtKey
   }
+})()
+
+export const JWT_KEY_ISSUER = (() => {
+  const jwtIssuer = import.meta.env.VITE_JWT_KEY_ISSUER
+  if (!jwtIssuer) {
+    console.warn(
+      'Environment VITE_JWT_KEY_ISSUER key not found, using',
+      DEFAULT_JWT_ISSUER,
+    )
+    return DEFAULT_JWT_ISSUER
+  }
+  return jwtIssuer
 })()
 
 export const REFRESH_TOKEN_LENGTH = (() => {

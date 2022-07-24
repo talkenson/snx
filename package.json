@@ -1,6 +1,6 @@
 {
   "name": "@pokelabs/poke",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Poke - universal backend engine with WS and Rest API",
   "main": "/dist/index.mjs",
   "scripts": {
