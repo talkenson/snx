@@ -1,6 +1,6 @@
 import express, { Router } from 'express'
-import app from './baseExpressApp'
 import multer from 'multer'
+import app from './baseExpressApp'
 import filesStore from '@/store/files.store'
 
 /**

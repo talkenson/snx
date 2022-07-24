@@ -1,7 +1,7 @@
-import { wallStore } from "@/store/wall.store";
-import { Controller } from "@/types";
 import { createController } from "@/common/createController";
 import { WallPost } from "@/models/Wall.model";
+import { wallStore } from "@/store/wall.store";
+import { Controller } from "@/types";
 
 export const registerWallController: Controller = createController({
   scope: "wall",

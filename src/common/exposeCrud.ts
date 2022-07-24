@@ -1,6 +1,6 @@
 import { flow } from 'fp-ts/lib/function'
-import { AddListenerFunction, ControllerRegisterer } from '@/types'
 import { Crud, CrudMethod, CrudMethodName } from '@/base/types'
+import { AddListenerFunction, ControllerRegisterer } from '@/types'
 
 export const exposeCrud =
   (

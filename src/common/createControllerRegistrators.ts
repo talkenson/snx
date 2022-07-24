@@ -1,12 +1,12 @@
-import { Server } from 'socket.io'
 import { Router } from 'express'
+import { Server } from 'socket.io'
+import { registerBrokerControllers } from '@/common/registerBrokerControllers'
 import { registerEventControllers } from '@/common/registerEventControllers'
 import { registerRestControllers } from '@/common/registerRestControllers'
-import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
-import { Controller, BrokerSubscription } from '@/types'
-import { User } from '@/models/User.model'
 import { GraphItem } from '@/common/types/GraphItem.model'
-import { registerBrokerControllers } from '@/common/registerBrokerControllers'
+import { User } from '@/models/User.model'
+import { Controller, BrokerSubscription } from '@/types'
+import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
 
 export const createControllerRegistrar = (
   controllers: Controller[],

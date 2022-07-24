@@ -1,6 +1,6 @@
+import express from 'express'
 import jwt from 'jsonwebtoken'
 import { JWT_KEY } from '@/config/secrets'
-import express from 'express'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 
 export const authenticationExpressMiddleware: express.RequestHandler = (

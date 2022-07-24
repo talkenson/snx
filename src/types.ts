@@ -1,14 +1,14 @@
-import { Server, Socket } from 'socket.io'
 import { Response, Router } from 'express'
-import { User } from '@/models/User.model'
-import { GraphItem } from '@/common/types/GraphItem.model'
 import { Msg, Subscription } from 'nats'
+import { Server, Socket } from 'socket.io'
+import { GraphItem } from '@/common/types/GraphItem.model'
+import { User } from '@/models/User.model'
 
 export type EventName = string
 
 export type ListenerFunction<Props = any> = (
-  resolve: (...result: any[]) => void,
-  reject: (...reason: any[]) => void,
+  resolve: (...result: unknown[]) => void,
+  reject: (...reason: unknown[]) => void,
   context: ControllerContext,
 ) => (...payload: Props[]) => void
 
@@ -16,7 +16,7 @@ export type EventDrivenListenerFunction = (
   context: ControllerContext,
 ) => (
   hash: string,
-  ...payload: any[]
+  ...payload: unknown[]
 ) => ReturnType<ReturnType<ListenerFunction>>
 
 export type RestResponse = Response<any, Record<string, any>>
@@ -59,7 +59,9 @@ export type AddListenerFunction = <Props = any>(
   specificTransport?: PokeTransports[],
 ) => void
 
-export type ControllerContext<T extends Record<string, any> = {}> = {
+export type ControllerContext<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> = {
   user: User | undefined
   event: string
   authRequired?: boolean

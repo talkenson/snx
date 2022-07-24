@@ -1,9 +1,9 @@
-import { useTable } from '@/store/store'
+import { PrimaryKeyFillStrategy } from '@/base/types'
 import {
   Credentials,
   credentialsPrimaryKey,
 } from '@/common/types/Credentials.model'
-import { PrimaryKeyFillStrategy } from '@/base/types'
+import { useTable } from '@/store/store'
 
 export const authenticationStore = useTable<
   Credentials,

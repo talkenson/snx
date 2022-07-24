@@ -1,21 +1,21 @@
-import { userStore } from '@/store/user.store'
-import { authenticationStore } from '@/store/authentication.store'
-import { Controller } from '@/types'
-import { createController } from '@/common/createController'
-import { exists } from '@/utils/exists'
 import bcrypt from 'bcrypt'
-import { REFRESH_TOKEN_LENGTH } from '@/config/secrets'
+import { nanoid } from 'nanoid'
+import { createController } from '@/common/createController'
 import {
   AuthCredentials,
   AuthStrategy,
   RegisterCredentials,
   RegisterStrategy,
 } from '@/common/types/Strategy.model'
-import { createRandomUserName } from '@/utils/helpers/createRandomUserName'
-import { nanoid } from 'nanoid'
-import { issueNewToken } from '@/utils/authentication/issueNewToken'
+import { REFRESH_TOKEN_LENGTH } from '@/config/secrets'
+import { authenticationStore } from '@/store/authentication.store'
+import { userStore } from '@/store/user.store'
+import { Controller } from '@/types'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
+import { issueNewToken } from '@/utils/authentication/issueNewToken'
+import { exists } from '@/utils/exists'
+import { createRandomUserName } from '@/utils/helpers/createRandomUserName'
 
 export const registerAuthenticateController: Controller = createController({
   scope: 'authentication',

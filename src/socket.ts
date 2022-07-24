@@ -1,5 +1,5 @@
-import { Server } from 'socket.io'
 import type { Server as HTTPServer } from 'http'
+import { Server } from 'socket.io'
 
 const patchServerWithIO = (httpServer: HTTPServer) => {
   return new Server(httpServer, {

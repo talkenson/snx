@@ -1,3 +1,6 @@
+import { Server, Socket } from 'socket.io'
+import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
+import { emit } from '@/transporter/emit'
 import {
   Controller,
   ControllerContext,
@@ -8,10 +11,7 @@ import {
   RestListenerMap,
   EventControllerRegistrar,
 } from '@/types'
-import { Server, Socket } from 'socket.io'
-import { emit } from '@/transporter/emit'
 import { exists } from '@/utils/exists'
-import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 
 export const registerEventControllers: EventControllerRegistrar =
   (io: Server, socket: Socket, user) => async (controllers: Controller[]) => {
@@ -105,7 +105,6 @@ export const registerEventControllers: EventControllerRegistrar =
     eventListenerMap.forEach((listenerFn, eventName) => {
       socket.on(
         eventName,
-        // @ts-ignore
         listenerFn({ transport: 'ws', user: user, event: eventName }),
       )
     })

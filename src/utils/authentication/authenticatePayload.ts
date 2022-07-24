@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
+import { User } from '@/models/User.model'
 import userStore from '@/store/user.store'
 import { exists } from '@/utils/exists'
-import { User } from '@/models/User.model'
 
 export const authenticatePayload = (
   payload: jwt.JwtPayload,

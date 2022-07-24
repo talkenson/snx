@@ -1,3 +1,6 @@
+import { Router } from 'express'
+import { GraphItem } from '@/common/types/GraphItem.model'
+import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import {
   Controller,
   ListenerFunction,
@@ -7,11 +10,8 @@ import {
   RestControllerRegistrar,
   ControllerContext,
 } from '@/types'
-import { Router } from 'express'
 import { exists } from '@/utils/exists'
-import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import { logEvent } from '@/utils/logEvent'
-import { GraphItem } from '@/common/types/GraphItem.model'
 
 export const registerRestControllers: RestControllerRegistrar =
   (router: Router) =>

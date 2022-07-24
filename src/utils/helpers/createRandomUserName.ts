@@ -1,5 +1,5 @@
-import names from './data/names.json'
 import adjectives from './data/adj.json'
+import names from './data/names.json'
 
 export const createRandomUserName = () => {
   const nameId = Math.floor(Math.random() * names.length)

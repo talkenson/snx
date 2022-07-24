@@ -1,17 +1,16 @@
 'use strict'
-import { app } from '@/rest'
+import { Router } from 'express'
+import { subscription } from './brokerService'
 import {
   registerAllRestControllers,
   registerAllEventControllers,
   registerAllBrokerControllers,
 } from '@/listeners'
-import { Router } from 'express'
-import { callbackCollection } from '@/utils/beforeExitHook'
-import { authenticationExpressMiddleware } from '@/utils/authentication/authenticationMiddleware'
+import { app } from '@/rest'
 import { httpServer, ioServer } from '@/servers'
+import { authenticationExpressMiddleware } from '@/utils/authentication/authenticationMiddleware'
+import { callbackCollection } from '@/utils/beforeExitHook'
 import { logEvent } from '@/utils/logEvent'
-import { subscription } from './brokerService'
-
 const PORT = parseInt(import.meta.env.VITE_PORT || '3071')
 const HOST = import.meta.env.VITE_HOST || '0.0.0.0'
 const SCHEMA = import.meta.env.VITE_SCHEMA || 'http'

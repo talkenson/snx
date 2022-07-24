@@ -83,7 +83,7 @@ export const useTableWithStore =
       selectSome(reducer, total) {
         if (total <= 0) return []
         const selection: T[] = []
-        for (let [key, item] of Object.entries<T>(STORAGE[tableName])) {
+        for (const [key, item] of Object.entries<T>(STORAGE[tableName])) {
           if (reducer(item, key as PK)) {
             selection.push(item)
           }

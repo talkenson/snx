@@ -6,9 +6,9 @@ import {
   NATS_USE_FLAG,
   POKE_API_BROKER_PREFIX,
 } from '@/config/secrets'
+import { BrokerPublish, BrokerSubscription } from '@/types'
 import { addBeforeExitHook } from '@/utils/beforeExitHook'
 import { logEvent } from '@/utils/logEvent'
-import { BrokerPublish, BrokerSubscription } from '@/types'
 
 const createNATSConnection = async (): Promise<{
   publish: BrokerPublish

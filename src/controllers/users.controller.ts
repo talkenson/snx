@@ -1,8 +1,8 @@
+import { Server, Socket } from 'socket.io'
+import { createController } from '@/common/createController'
 import { exposeCrud } from '@/common/exposeCrud'
 import { userStore } from '@/store/user.store'
-import { Server, Socket } from 'socket.io'
 import { Controller } from '@/types'
-import { createController } from '@/common/createController'
 
 export const registerUsersController: Controller = createController({
   scope: 'users',

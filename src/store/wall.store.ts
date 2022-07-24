@@ -1,7 +1,7 @@
-import { useTable } from '@/store/store'
-import { WallPost, primaryKey } from '@/models/Wall.model'
-import { addBeforeExitHook } from '@/utils/beforeExitHook'
 import { PrimaryKeyFillStrategy } from '@/base/types'
+import { WallPost, primaryKey } from '@/models/Wall.model'
+import { useTable } from '@/store/store'
+import { addBeforeExitHook } from '@/utils/beforeExitHook'
 import { logEvent } from '@/utils/logEvent'
 
 export const wallStore = useTable<WallPost, typeof primaryKey>(

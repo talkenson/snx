@@ -1,5 +1,5 @@
-import { useTableWithStore as useTable } from "@/base/useTableWithStore";
 import { beforeEach, describe, expect, it } from "vitest";
+import { useTableWithStore as useTable } from "@/base/useTableWithStore";
 
 type User = {
   id: number;

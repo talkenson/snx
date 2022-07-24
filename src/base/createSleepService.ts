@@ -1,5 +1,5 @@
 export const createSleepService = () => {
-  let undoSleep: CallableFunction = () => {}
+  let undoSleep: CallableFunction = () => undefined
   const sleep = (ms: number) =>
     new Promise(res => {
       undoSleep = () => res(undefined)
