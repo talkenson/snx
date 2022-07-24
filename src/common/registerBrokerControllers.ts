@@ -1,5 +1,6 @@
 import { StringCodec } from 'nats'
 import { publish } from '@/brokerService'
+import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import { POKE_API_BROKER_PREFIX } from '@/config/secrets'
 import { User } from '@/models/User.model'
@@ -13,6 +14,7 @@ import {
   BrokerSubscription,
   BrokerListenerMap,
   BrokerRequestPayload,
+  AddListenerFirstArgument,
 } from '@/types'
 import { exists } from '@/utils/exists'
 import { parseJSON } from '@/utils/parseJSON'
@@ -53,10 +55,12 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         controllerTransport?: PokeTransports[],
       ) =>
       (
-        eventName: string,
+        eventNameOrMetadata: AddListenerFirstArgument,
         handler: ListenerFunction,
-        specificTransport?: PokeTransports[],
       ) => {
+        const { eventName, ...metadata } =
+          getAddListenerMetadata(eventNameOrMetadata)
+
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setListener = () => {
@@ -91,7 +95,7 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         }
 
         if (
-          specificTransport?.includes('broker') ||
+          metadata.transports?.includes('broker') ||
           controllerTransport?.includes('broker')
         ) {
           setListener()

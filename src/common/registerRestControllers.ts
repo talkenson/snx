@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { GraphItem } from '@/common/types/GraphItem.model'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import {
@@ -9,6 +10,7 @@ import {
   RestListenerMap,
   RestControllerRegistrar,
   ControllerContext,
+  AddListenerFirstArgument,
 } from '@/types'
 import { exists } from '@/utils/exists'
 import { logEvent } from '@/utils/logEvent'
@@ -31,16 +33,19 @@ export const registerRestControllers: RestControllerRegistrar =
         controllerTransport?: PokeTransports[],
       ) =>
       (
-        eventName: string,
+        eventNameOrMetadata: AddListenerFirstArgument,
         handler: ListenerFunction,
-        specificTransport?: PokeTransports[],
       ) => {
+        const { eventName, ...metadata } =
+          getAddListenerMetadata(eventNameOrMetadata)
+
         // Pushing to graph
 
         graphBase.push({
           scope: scope,
           action: eventName,
-          transports: specificTransport || controllerTransport || ['ws'],
+          transports: metadata.transports || controllerTransport || ['ws'],
+          schema: metadata.schema,
         })
 
         const fullEventRouteName = `${scope}/${eventName}`
@@ -78,8 +83,8 @@ export const registerRestControllers: RestControllerRegistrar =
          * Then listener is more important, then controller
          */
 
-        if (specificTransport) {
-          if (specificTransport.includes('rest')) {
+        if (metadata.transports) {
+          if (metadata.transports.includes('rest')) {
             setRestListener()
           } else {
             setFallbackRestListener()

@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io'
+import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import { emit } from '@/transporter/emit'
 import {
@@ -10,6 +11,7 @@ import {
   PokeTransports,
   RestListenerMap,
   EventControllerRegistrar,
+  AddListenerFirstArgument,
 } from '@/types'
 import { exists } from '@/utils/exists'
 
@@ -32,10 +34,12 @@ export const registerEventControllers: EventControllerRegistrar =
         controllerTransport?: PokeTransports[],
       ) =>
       (
-        eventName: string,
+        eventNameOrMetadata: AddListenerFirstArgument,
         handler: ListenerFunction,
-        specificTransport?: PokeTransports[],
       ) => {
+        const { eventName, ...metadata } =
+          getAddListenerMetadata(eventNameOrMetadata)
+
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setEventListener = () => {
@@ -73,7 +77,7 @@ export const registerEventControllers: EventControllerRegistrar =
          * Defaults to only WS API if some specific options wasn't passed
          * Then listener is more important, then controller
          */
-        if (specificTransport?.includes('ws')) {
+        if (metadata.transports?.includes('ws')) {
           setEventListener()
         } else {
           if (!controllerTransport || !controllerTransport.length) {

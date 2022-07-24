@@ -6,6 +6,14 @@ import { User } from '@/models/User.model'
 
 export type EventName = string
 
+export type ListenerMetadata = {
+  eventName: EventName
+  transports?: PokeTransports[]
+  schema?: unknown
+}
+
+export type AddListenerFirstArgument = EventName | ListenerMetadata
+
 export type ListenerFunction<Props = any> = (
   resolve: (...result: unknown[]) => void,
   reject: (...reason: unknown[]) => void,
@@ -54,9 +62,8 @@ export type BrokerControllerRegistrar = (
 ) => (controllers: Controller[]) => Promise<void>
 
 export type AddListenerFunction = <Props = any>(
-  eventName: string,
+  eventNameOrMeta: AddListenerFirstArgument,
   handler: ListenerFunction<Props>,
-  specificTransport?: PokeTransports[],
 ) => void
 
 export type ControllerContext<

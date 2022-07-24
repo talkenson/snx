@@ -1,32 +1,34 @@
-import { createController } from "@/common/createController";
-import { WallPost } from "@/models/Wall.model";
-import { wallStore } from "@/store/wall.store";
-import { Controller } from "@/types";
+import { createController } from '@/common/createController'
+import { WallPost } from '@/models/Wall.model'
+import { wallStore } from '@/store/wall.store'
+import { Controller } from '@/types'
 
 export const registerWallController: Controller = createController({
-  scope: "wall",
+  scope: 'wall',
   requireAuth: true,
-  transport: ["rest", "ws"],
-  register: (addListener) => {
+  transport: ['rest', 'ws'],
+  register: addListener => {
     addListener<WallPost>(
-      "createPost",
-      (resolve, reject, context) => (item) => {
-        const result = wallStore.create(item);
-        resolve(result);
+      {
+        eventName: 'createPost',
+        transports: ['rest'],
       },
-      ["rest"]
-    );
+      (resolve, reject, context) => item => {
+        const result = wallStore.create(item)
+        resolve(result)
+      },
+    )
 
     addListener(
-      "get",
+      'get',
       (resolve, reject, context) =>
         ({ target }: { target: number }) => {
-          resolve({ content: wallStore.get(target), context });
-        }
-    );
+          resolve({ content: wallStore.get(target), context })
+        },
+    )
 
-    addListener("list", (resolve, reject, context) => () => {
-      resolve(wallStore.dumpToArray());
-    });
+    addListener('list', (resolve, reject, context) => () => {
+      resolve(wallStore.dumpToArray())
+    })
   },
-});
+})

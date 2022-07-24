@@ -22,53 +22,62 @@ export const registerAuthenticateController: Controller = createController({
   transport: ['rest'],
   requireAuth: false,
   register: addListener => {
-    addListener('auth', (resolve, reject) => (payload: AuthCredentials) => {
-      if (payload.strategy === AuthStrategy.Local) {
-        if (!exists(payload.login) || !exists(payload.password))
-          return reject({ reason: 'BAD_CREDENTIALS' })
-
-        const auth = authenticationStore.find(
-          authInfo => authInfo.login === payload.login,
-        )
-        if (!exists(auth)) return reject({ reason: 'USER_NOT_FOUND' })
-
-        bcrypt.compare(payload.password, auth.password, (err, result) => {
-          if (result) {
-            return resolve(issueNewToken(auth))
-          } else {
+    addListener(
+      {
+        eventName: 'auth',
+      },
+      (resolve, reject) => (payload: AuthCredentials) => {
+        if (payload.strategy === AuthStrategy.Local) {
+          if (!exists(payload.login) || !exists(payload.password))
             return reject({ reason: 'BAD_CREDENTIALS' })
-          }
-        })
-      } else if (payload.strategy === AuthStrategy.RefreshToken) {
-        if (!exists(payload.refreshToken) || !exists(payload.refreshToken))
-          return reject({ reason: 'EMPTY_REFRESH_TOKEN' })
-        if (!exists(payload.oldAccessToken))
-          return reject({ reason: 'EMPTY_OLD_ACCESS_TOKEN' })
 
-        const jwtBody = extractJwtInfo(payload.oldAccessToken)
+          const auth = authenticationStore.find(
+            authInfo => authInfo.login === payload.login,
+          )
+          if (!exists(auth)) return reject({ reason: 'USER_NOT_FOUND' })
 
-        const user =
-          jwtBody && typeof jwtBody !== 'string'
-            ? authenticatePayload(jwtBody)
-            : undefined
+          bcrypt.compare(payload.password, auth.password, (err, result) => {
+            if (result) {
+              return resolve(issueNewToken(auth))
+            } else {
+              return reject({ reason: 'BAD_CREDENTIALS' })
+            }
+          })
+        } else if (payload.strategy === AuthStrategy.RefreshToken) {
+          if (!exists(payload.refreshToken) || !exists(payload.refreshToken))
+            return reject({ reason: 'EMPTY_REFRESH_TOKEN' })
+          if (!exists(payload.oldAccessToken))
+            return reject({ reason: 'EMPTY_OLD_ACCESS_TOKEN' })
 
-        if (!exists(user)) return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
+          const jwtBody = extractJwtInfo(payload.oldAccessToken)
 
-        const auth = authenticationStore.get(user.userId)
+          const user =
+            jwtBody && typeof jwtBody !== 'string'
+              ? authenticatePayload(jwtBody)
+              : undefined
 
-        if (!exists(auth) || auth.refreshToken !== payload.refreshToken)
-          return reject({ reason: 'INVALID_REFRESH_TOKEN' })
+          if (!exists(user))
+            return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
 
-        return resolve(issueNewToken(auth))
-      } else {
-        return reject({
-          reason: 'UNSUPPORTED_STRATEGY',
-        })
-      }
-    })
+          const auth = authenticationStore.get(user.userId)
+
+          if (!exists(auth) || auth.refreshToken !== payload.refreshToken)
+            return reject({ reason: 'INVALID_REFRESH_TOKEN' })
+
+          return resolve(issueNewToken(auth))
+        } else {
+          return reject({
+            reason: 'UNSUPPORTED_STRATEGY',
+          })
+        }
+      },
+    )
 
     addListener(
-      'register',
+      {
+        eventName: 'register',
+        transports: ['ws', 'rest', 'broker'],
+      },
       (resolve, reject, context) => (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
           if (!exists(payload.login) || !exists(payload.password))
@@ -104,7 +113,6 @@ export const registerAuthenticateController: Controller = createController({
           })
         }
       },
-      ['ws', 'rest', 'broker'],
     )
   },
 })
