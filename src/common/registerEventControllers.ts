@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io'
+import { combineAuthRequired } from '@/common/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import { emit } from '@/transporter/emit'
@@ -39,6 +40,8 @@ export const registerEventControllers: EventControllerRegistrar =
         const { eventName, ...metadata } =
           getAddListenerMetadata(eventNameOrMetadata)
 
+        const authFlag = combineAuthRequired(authRequired, metadata.requireAuth)
+
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setEventListener = () => {
@@ -46,7 +49,7 @@ export const registerEventControllers: EventControllerRegistrar =
             fullEventRouteName,
             (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
-                if (!authRequired || exists(context.user))
+                if (!authFlag || exists(context.user))
                   return handler(
                     createSocketResolve(fullEventRouteName, hash),
                     createSocketReject(fullEventRouteName, hash),

@@ -11,6 +11,7 @@ export type ListenerMetadata = {
   transports?: PokeTransports[]
   schema?: unknown
   description?: string
+  requireAuth?: boolean
 }
 
 export type AddListenerFirstArgument = EventName | ListenerMetadata

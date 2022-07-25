@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { combineAuthRequired } from '@/common/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { GraphItem } from '@/common/types/GraphItem.model'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
@@ -39,6 +40,8 @@ export const registerRestControllers: RestControllerRegistrar =
         const { eventName, ...metadata } =
           getAddListenerMetadata(eventNameOrMetadata)
 
+        const authFlag = combineAuthRequired(authRequired, metadata.requireAuth)
+
         // Pushing to graph
 
         graphBase.push({
@@ -46,7 +49,7 @@ export const registerRestControllers: RestControllerRegistrar =
           action: eventName,
           transports: metadata.transports || controllerTransport || ['ws'],
           schema: metadata.schema,
-          authRequired: !!authRequired,
+          authRequired: authFlag,
           description: metadata.description,
         })
 
@@ -57,7 +60,7 @@ export const registerRestControllers: RestControllerRegistrar =
             fullEventRouteName,
             context =>
               (res, ...params: any[]) => {
-                if (!authRequired || exists(context.user))
+                if (!authFlag || exists(context.user))
                   return handler(
                     createRestResolve(res),
                     createRestReject(res),

@@ -1,5 +1,6 @@
 import { StringCodec } from 'nats'
 import { publish } from '@/brokerService'
+import { combineAuthRequired } from '@/common/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/universal/handlerRestrictUnauthorized'
 import { POKE_API_BROKER_PREFIX } from '@/config/secrets'
@@ -61,6 +62,8 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         const { eventName, ...metadata } =
           getAddListenerMetadata(eventNameOrMetadata)
 
+        const authFlag = combineAuthRequired(authRequired, metadata.requireAuth)
+
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setListener = () => {
@@ -68,7 +71,7 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
             fullEventRouteName,
             (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
-                if (!authRequired || exists(context.user))
+                if (!authFlag || exists(context.user))
                   return handler(
                     createResolve(fullEventRouteName, hash),
                     createReject(fullEventRouteName, hash),
