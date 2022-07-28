@@ -15,7 +15,7 @@ export const registerWallController: Controller = createController({
       },
       (resolve, reject, context) => item => {
         const result = wallStore.create(item)
-        resolve(result)
+        return resolve(result)
       },
     )
 
@@ -23,12 +23,12 @@ export const registerWallController: Controller = createController({
       'get',
       (resolve, reject, context) =>
         ({ target }: { target: number }) => {
-          resolve({ content: wallStore.get(target), context })
+          return reject({ content: wallStore.get(target), context })
         },
     )
 
     addListener('list', (resolve, reject, context) => () => {
-      resolve(wallStore.dumpToArray())
+      return resolve(wallStore.dumpToArray())
     })
   },
 })

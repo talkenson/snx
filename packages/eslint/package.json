@@ -1,0 +1,8 @@
+{
+  "name": "eslint-plugin-poke-eslint",
+  "version": "1.0.0",
+  "description": "Poke built-in ESLint rules and suggestions package",
+  "main": "index.js",
+  "author": "Vitaly Shatalov (@talkenson)",
+  "license": "MIT"
+}

@@ -10,8 +10,9 @@ module.exports = {
     'prettier',
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['import', '@typescript-eslint'],
+  plugins: ['import', '@typescript-eslint', 'poke-eslint'],
   rules: {
+    'poke-eslint/poke-return-on-resolve-reject': 1,
     '@typescript-eslint/ban-ts-comment': 1,
     eqeqeq: ['error', 'always'],
     'import/order': [
