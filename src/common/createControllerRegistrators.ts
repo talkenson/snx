@@ -1,44 +1,44 @@
 import { Router } from 'express'
-import { Server } from 'socket.io'
-import { registerBrokerControllers } from '@/common/registerBrokerControllers'
-import { registerEventControllers } from '@/common/registerEventControllers'
-import { registerRestControllers } from '@/common/registerRestControllers'
-import { GraphItem } from '@/common/types/GraphItem.model'
-import { User } from '@/models/User.model'
-import { Controller, BrokerSubscription } from '@/types'
+import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
+import { brokerRegistrar } from '@/transporters/broker/broker.registrar'
+import { restRegistrar } from '@/transporters/rest/rest.registrar'
+import { websocketRegistrar } from '@/transporters/websocket/websocket.registrar'
+import {
+  Controller,
+  ControllerRegistrarParameters,
+} from '@/types/controllerRelated.types'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
 import { createGraph } from '@/utils/graph/createGraph'
 
 export const createControllerRegistrar = (
   controllers: Controller[],
+  { ws, rest, broker }: ControllerRegistrarParameters,
 ): {
-  registerAllEventControllers: (io: Server) => void
-  registerAllRestControllers: (router: Router) => void
-  registerAllBrokerControllers: (subscription: BrokerSubscription) => void
+  registerAllEventControllers: () => void
+  registerAllRestControllers: () => Router
+  registerAllBrokerControllers: () => void
 } => {
-  const graph: GraphItem[] = []
-
-  const registerAllEventControllers = (io: Server) => {
+  const registerAllEventControllers = () => {
     // auto registration socket routes for each client
-    io.on('connection', socket => {
+    ws.io.on('connection', socket => {
       authenticationSocketMiddleware(
         socket.client.request.headers.authorization,
-      ).then(context =>
-        registerEventControllers(io, socket, context)(controllers),
-      )
+      ).then(context => websocketRegistrar(ws.io, socket, context)(controllers))
     })
   }
 
-  const registerAllRestControllers = (router: Router) => {
-    registerRestControllers(router)(controllers, graph)
-    const schema = createGraph(graph)
-    router.get('/', (req, res) => {
-      res.json({ schema })
+  const registerAllRestControllers = () => {
+    const schema: SchemaItem[] = []
+    restRegistrar(rest.router)(controllers, schema)
+    const builtSchema = createGraph(schema)
+    rest.router.get('/', (req, res) => {
+      res.json({ schema: builtSchema })
     })
+    return rest.router
   }
 
-  const registerAllBrokerControllers = (subscription: BrokerSubscription) => {
-    registerBrokerControllers(subscription)(controllers)
+  const registerAllBrokerControllers = () => {
+    brokerRegistrar(broker.subscription)(controllers)
   }
 
   return {

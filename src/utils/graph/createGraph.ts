@@ -1,17 +1,17 @@
-import { GraphItem } from '@/common/types/GraphItem.model'
+import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 
-const necessaryKeys: (keyof GraphItem)[] = ['scope', 'action', 'authRequired']
+const necessaryKeys: (keyof SchemaItem)[] = ['scope', 'action', 'authRequired']
 
-export const createGraph = (graph: GraphItem[]) => {
+export const createGraph = (graph: SchemaItem[]) => {
   return (
     graph.map(v =>
       Object.fromEntries(
         Object.entries(v).filter(
           ([key, value]) =>
-            !!value || necessaryKeys.includes(key as keyof GraphItem),
+            !!value || necessaryKeys.includes(key as keyof SchemaItem),
         ),
       ),
-    ) as GraphItem[]
+    ) as SchemaItem[]
   ).reduce((a, v) => {
     return {
       ...a,

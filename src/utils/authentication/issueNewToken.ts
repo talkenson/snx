@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken'
 import { nanoid } from 'nanoid'
-import { getClientId } from '@/common/getClientId'
-import { Credentials } from '@/common/types/Credentials.model'
 import {
   JWT_KEY,
   JWT_KEY_ISSUER,
   JWT_LIFETIME_SEC,
   REFRESH_TOKEN_LENGTH,
 } from '@/config/secrets'
-import authenticationStore from '@/store/authentication.store'
+import { Credentials } from '@/services/authentication/models/Credentials.model'
+import authenticationStore from '@/services/authentication/stores/authentication.store'
+import { getClientId } from '@/utils/authentication/getClientId'
 
 export const issueNewToken = (
   auth: Credentials,

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
-import { getClientId } from '@/common/getClientId'
 import { JWT_KEY_ISSUER } from '@/config/secrets'
-import userStore from '@/store/user.store'
-import { ForeignContext } from '@/types'
+import userStore from '@/services/users/stores/user.store'
+import { ForeignContext } from '@/transporters/websocket/types'
+import { getClientId } from '@/utils/authentication/getClientId'
 import { exists } from '@/utils/exists'
 
 export const authenticatePayload = (

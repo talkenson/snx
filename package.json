@@ -1,6 +1,6 @@
 {
   "name": "@pokelabs/poke",
-  "version": "2.4.1",
+  "version": "3.0.0",
   "description": "Poke - universal backend engine with WS and Rest API",
   "main": "/dist/index.mjs",
   "engines": {
@@ -11,7 +11,9 @@
     "build": "vite build",
     "dev": "nodemon nodemon.json",
     "tsc": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "lint:fix": "eslint --fix ./src",
+    "graph": "depcruise --ts-config tsconfig.json --include-only \"^src\" --output-type dot src | dot -T png > depGraph.png"
   },
   "author": "@talkenson (https://github.com/talkenson)",
   "license": "UNLICENSED",

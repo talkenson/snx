@@ -1,7 +1,7 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import { CONTEXT_FALLBACK_CLIENT_ID, JWT_KEY } from '@/config/secrets'
-import { ForeignContext } from '@/types'
+import { ForeignContext } from '@/transporters/websocket/types'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 
 const verify = (jwtToken?: string) =>

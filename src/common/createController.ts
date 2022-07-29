@@ -1,5 +1,7 @@
-import { Server } from 'socket.io'
-import { Controller, ControllerRegisterer } from '@/types'
+import {
+  Controller,
+  ControllerRegisterer,
+} from '@/types/controllerRelated.types'
 
 export const createController = (controller: {
   scope: Controller['scope']

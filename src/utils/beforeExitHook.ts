@@ -1,4 +1,4 @@
-const createBeforeExitHook = () => {
+const createUseBeforeExit = () => {
   const callbackCollection: Array<() => any | Promise<any>> = []
   const addBeforeExitHook = (callback: () => any | Promise<any>) => {
     const id = callbackCollection.push(callback)
@@ -15,4 +15,4 @@ const createBeforeExitHook = () => {
 }
 
 export const { addBeforeExitHook, deleteBeforeExitHook, callbackCollection } =
-  createBeforeExitHook()
+  createUseBeforeExit()
