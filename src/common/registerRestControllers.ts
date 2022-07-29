@@ -12,6 +12,7 @@ import {
   RestControllerRegistrar,
   ControllerContext,
   AddListenerFirstArgument,
+  RestMethod,
 } from '@/types'
 import { exists } from '@/utils/exists'
 import { logEvent } from '@/utils/logEvent'
@@ -51,14 +52,18 @@ export const registerRestControllers: RestControllerRegistrar =
           schema: metadata.schema,
           authRequired: authFlag,
           description: metadata.description,
+          restMethods: metadata.restMethods || ['POST'],
         })
 
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setRestListener = () => {
-          restListenerMap.set(
-            fullEventRouteName,
-            context =>
+          restListenerMap.set(fullEventRouteName, {
+            options: {
+              restMethods: metadata.restMethods || ['POST'],
+            },
+            listener:
+              context =>
               (res, ...params: any[]) => {
                 if (!authFlag || exists(context.user))
                   return handler(
@@ -71,19 +76,21 @@ export const registerRestControllers: RestControllerRegistrar =
                   context,
                 )
               },
-          )
+          })
         }
 
         const setFallbackRestListener = () => {
-          restListenerMap.set(
-            fullEventRouteName,
-            context => res =>
+          restListenerMap.set(fullEventRouteName, {
+            options: {
+              restMethods: metadata.restMethods || ['POST'],
+            },
+            listener: context => res =>
               res.json({
                 status: 'Unreachable',
                 solution: 'TRY_OTHER_TRANSPORT',
                 handler: fullEventRouteName,
               }),
-          )
+          })
         }
 
         /**
@@ -120,14 +127,18 @@ export const registerRestControllers: RestControllerRegistrar =
      * START Rest Registration Section
      */
 
-    restListenerMap.forEach((listenerFn, eventName) => {
-      router.post(`/${eventName}`, (req, res) => {
-        return listenerFn({
-          transport: 'rest',
-          user: res.locals.user,
-          clientId: res.locals.clientId,
-          event: eventName,
-        })(res, req.body)
+    restListenerMap.forEach(({ options, listener: listenerFn }, eventName) => {
+      router.all(`/${eventName}`, (req, res) => {
+        if (options?.restMethods.includes(<RestMethod>req.method))
+          return listenerFn({
+            transport: 'rest',
+            user: res.locals.user,
+            clientId: res.locals.clientId,
+            event: eventName,
+          })(res, req.body)
+        return res
+          .status(404)
+          .send({ reason: 'NOT_FOUND', supported: options?.restMethods })
       })
     })
 

@@ -45,9 +45,9 @@ export const registerEventControllers: EventControllerRegistrar =
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setEventListener = () => {
-          eventListenerMap.set(
-            fullEventRouteName,
-            (context: ControllerContext) =>
+          eventListenerMap.set(fullEventRouteName, {
+            listener:
+              (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
                 if (!authFlag || exists(context.user))
                   return handler(
@@ -59,19 +59,21 @@ export const registerEventControllers: EventControllerRegistrar =
                   createSocketReject(fullEventRouteName, hash),
                 )
               },
-          )
+          })
         }
 
         const setFallbackEventListener = () => {
-          eventListenerMap.set(fullEventRouteName, () => (hash: string) => {
-            createSocketReject(
-              fullEventRouteName,
-              hash,
-            )({
-              status: 'Unreachable',
-              solution: 'TRY_OTHER_TRANSPORT',
-              handler: fullEventRouteName,
-            })
+          eventListenerMap.set(fullEventRouteName, {
+            listener: () => (hash: string) => {
+              createSocketReject(
+                fullEventRouteName,
+                hash,
+              )({
+                status: 'Unreachable',
+                solution: 'TRY_OTHER_TRANSPORT',
+                handler: fullEventRouteName,
+              })
+            },
           })
         }
 
@@ -108,7 +110,7 @@ export const registerEventControllers: EventControllerRegistrar =
      * START Socket Registration Section
      */
 
-    eventListenerMap.forEach((listenerFn, eventName) => {
+    eventListenerMap.forEach(({ listener: listenerFn }, eventName) => {
       socket.on(
         eventName,
         listenerFn({
@@ -123,7 +125,7 @@ export const registerEventControllers: EventControllerRegistrar =
     socket.onAny((...args) => console.log(socket.id, socket.rooms, args))
 
     socket.on('disconnect', () => {
-      eventListenerMap.forEach((listenerFn, eventName) =>
+      eventListenerMap.forEach(({ listener: listenerFn }, eventName) =>
         socket.off(eventName, listenerFn),
       )
     })

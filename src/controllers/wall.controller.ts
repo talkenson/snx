@@ -20,7 +20,10 @@ export const registerWallController: Controller = createController({
     )
 
     addListener(
-      'get',
+      {
+        eventName: 'get',
+        restMethods: ['GET'],
+      },
       (resolve, reject, context) =>
         ({ target }: { target: number }) => {
           return reject({ content: wallStore.get(target), context })

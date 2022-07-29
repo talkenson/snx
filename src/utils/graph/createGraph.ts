@@ -18,7 +18,7 @@ export const createGraph = (graph: GraphItem[]) => {
       [v.scope]: {
         ...(a[v.scope] ?? {}),
         [v.action]: {
-          method: 'POST',
+          methods: v.restMethods,
           authRequired: v.authRequired,
           transports: v.transports,
           description: v.description,

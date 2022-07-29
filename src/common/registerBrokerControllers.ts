@@ -67,9 +67,9 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         const fullEventRouteName = `${scope}/${eventName}`
 
         const setListener = () => {
-          brokerListenerMap.set(
-            fullEventRouteName,
-            (context: ControllerContext) =>
+          brokerListenerMap.set(fullEventRouteName, {
+            listener:
+              (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
                 if (!authFlag || exists(context.user))
                   return handler(
@@ -81,19 +81,21 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
                   createReject(fullEventRouteName, hash),
                 )
               },
-          )
+          })
         }
 
         const setFallbackListener = () => {
-          brokerListenerMap.set(fullEventRouteName, () => (hash: string) => {
-            createReject(
-              fullEventRouteName,
-              hash,
-            )({
-              status: 'Unreachable',
-              solution: 'TRY_OTHER_TRANSPORT',
-              handler: fullEventRouteName,
-            })
+          brokerListenerMap.set(fullEventRouteName, {
+            listener: () => (hash: string) => {
+              createReject(
+                fullEventRouteName,
+                hash,
+              )({
+                status: 'Unreachable',
+                solution: 'TRY_OTHER_TRANSPORT',
+                handler: fullEventRouteName,
+              })
+            },
           })
         }
 
@@ -125,10 +127,10 @@ export const registerBrokerControllers: BrokerControllerRegistrar =
         continue
       }
 
-      const listenerFn = brokerListenerMap.get(payload.eventName)
+      const listenerWrapper = brokerListenerMap.get(payload.eventName)
 
-      if (listenerFn) {
-        listenerFn({
+      if (listenerWrapper) {
+        listenerWrapper.listener({
           transport: 'broker',
           user: {} as User,
           clientId: 'broker',

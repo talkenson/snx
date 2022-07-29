@@ -4,6 +4,16 @@ import { Server, Socket } from 'socket.io'
 import { GraphItem } from '@/common/types/GraphItem.model'
 import { User } from '@/models/User.model'
 
+export type RestMethod =
+  | 'GET'
+  | 'POST'
+  | 'DELETE'
+  | 'PATCH'
+  | 'PUT'
+  | 'OPTIONS'
+  | 'HEAD'
+  | 'ALL'
+
 export type EventName = string
 
 export type ListenerMetadata = {
@@ -12,6 +22,7 @@ export type ListenerMetadata = {
   schema?: unknown
   description?: string
   requireAuth?: boolean
+  restMethods?: RestMethod[]
 }
 
 export type AddListenerFirstArgument = EventName | ListenerMetadata
@@ -45,9 +56,34 @@ export type BrokerDrivenListenerFunction = (
   ...payload: any[]
 ) => ReturnType<ReturnType<ListenerFunction>>
 
-export type EventListenerMap = Map<EventName, EventDrivenListenerFunction>
-export type RestListenerMap = Map<EventName, RestDrivenListenerFunction>
-export type BrokerListenerMap = Map<EventName, BrokerDrivenListenerFunction>
+type AnySourceDrivenListenerFunction =
+  | EventDrivenListenerFunction
+  | RestDrivenListenerFunction
+  | BrokerDrivenListenerFunction
+
+export type ListenerWrapperOptions<T extends AnySourceDrivenListenerFunction> =
+  T extends RestDrivenListenerFunction
+    ? {
+        restMethods: RestMethod[]
+      }
+    : never
+
+export type ListenerWrapper<T extends AnySourceDrivenListenerFunction> = {
+  options?: ListenerWrapperOptions<T>
+  listener: T
+}
+export type EventListenerMap = Map<
+  EventName,
+  ListenerWrapper<EventDrivenListenerFunction>
+>
+export type RestListenerMap = Map<
+  EventName,
+  ListenerWrapper<RestDrivenListenerFunction>
+>
+export type BrokerListenerMap = Map<
+  EventName,
+  ListenerWrapper<BrokerDrivenListenerFunction>
+>
 
 export type ForeignContext = {
   user?: User
