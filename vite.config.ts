@@ -1,12 +1,20 @@
 import * as path from 'path'
-import viteTsconfigPaths from 'vite-tsconfig-paths'
-
 import { defineConfig, Plugin } from 'vite'
+import topLevelAwait from 'vite-plugin-top-level-await'
+import viteTsconfigPaths from 'vite-tsconfig-paths'
 
 import pkg from './package.json'
 
 export default defineConfig({
-  plugins: [viteTsconfigPaths() as Plugin],
+  plugins: [
+    viteTsconfigPaths() as Plugin,
+    topLevelAwait({
+      // The export name of top-level await promise for each chunk module
+      promiseExportName: '__build_tla',
+      // The function to generate import names of top-level await promise in each chunk module
+      promiseImportName: i => `__build_tla_${i}`,
+    }),
+  ],
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
