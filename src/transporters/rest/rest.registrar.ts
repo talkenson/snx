@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
+import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 import {
   RestControllerRegistrar,
   RestListenerMap,
@@ -15,7 +16,6 @@ import {
   ListenerFunction,
 } from '@/types/listenerRelated.types'
 import { exists } from '@/utils/exists'
-import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 
 export const restRegistrar: RestControllerRegistrar =
   (router: Router) =>

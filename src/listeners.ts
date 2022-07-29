@@ -4,9 +4,9 @@ import { subscription } from '@/base/brokerService'
 import { createControllerRegistrar } from '@/common/createControllerRegistrators'
 import { registerAuthenticateController } from '@/services/authentication/authentication.controller'
 import { registerWallController } from '@/services/wall/wall.controller'
-import { logEvent } from '@/utils/logEvent'
+import { justLog } from '@/utils/justLog'
 
-logEvent('Creating registration handles...')
+justLog.info('Creating registration handles...')
 
 const router = Router()
 

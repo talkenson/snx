@@ -1,8 +1,8 @@
+import { z } from 'zod'
 import { createController } from '@/common/createController'
 import { WallPost } from '@/services/wall/models/Wall.model'
 import { wallStore } from '@/services/wall/stores'
 import { Controller } from '@/types/controllerRelated.types'
-import { z } from 'zod'
 
 export const registerWallController: Controller = createController({
   scope: 'wall',

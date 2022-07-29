@@ -1,5 +1,5 @@
-import * as z from 'zod'
 import { ContentType } from '@prisma/client'
+import * as z from 'zod'
 import { CompleteUser, RelatedUserModel } from './index'
 
 export const PostModel = z.object({

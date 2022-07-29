@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { BrokerDrivenListenerFunction } from '@/transporters/broker/types'
 import {
   RestDrivenListenerFunction,
@@ -6,7 +7,6 @@ import {
 import { EventDrivenListenerFunction } from '@/transporters/websocket/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { ControllerContext } from '@/types/controllerRelated.types'
-import { z } from 'zod'
 
 export type EventName = string
 

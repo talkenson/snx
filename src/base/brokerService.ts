@@ -8,7 +8,7 @@ import {
 } from '@/config/secrets'
 import { BrokerPublish, BrokerSubscription } from '@/transporters/broker/types'
 import { addBeforeExitHook } from '@/utils/beforeExitHook'
-import { logEvent } from '@/utils/logEvent'
+import { justLog } from '@/utils/justLog'
 
 const createNATSConnection = async (): Promise<{
   publish: BrokerPublish
@@ -23,26 +23,26 @@ const createNATSConnection = async (): Promise<{
     }
   }
 
-  logEvent(`NATS: Connecting to NATS server...`)
+  justLog.info(`NATS: Connecting to NATS server...`)
   const nc = await connect({
     servers: NATS_SERVER_ADDRESS,
     user: NATS_SERVER_USER,
     pass: NATS_SERVER_PASS,
   })
-  logEvent(`NATS: Connected to ${nc.getServer()}`)
+  justLog.success(`NATS: Connected to ${nc.getServer()}`)
 
   const sc = StringCodec()
 
   const subscription = nc.subscribe(`${POKE_API_BROKER_PREFIX}.request`) // poke.api.request.CLIENT_ID
 
   addBeforeExitHook(async () => {
-    logEvent('Draining NATS queue...')
+    justLog.info('Draining NATS queue...')
     await nc.drain() // like close, but will ensure that packages are received
   })
 
   const publish = (channel: string, data: any) =>
     nc.isClosed()
-      ? logEvent('ERROR: NATS Publishing when connection is closed!')
+      ? justLog.error('ERROR: NATS Publishing when connection is closed!')
       : nc.publish(channel, sc.encode(JSON.stringify(data)))
 
   return {

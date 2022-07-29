@@ -9,6 +9,7 @@ import {
 } from '@/types/controllerRelated.types'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
 import { createGraph } from '@/utils/graph/createGraph'
+import { justLog } from '@/utils/justLog'
 
 export const createControllerRegistrar = (
   controllers: Controller[],

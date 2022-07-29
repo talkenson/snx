@@ -2,7 +2,7 @@ import { useStore } from '@/base/useStore'
 import { PrimaryKeyFillStrategy } from '@/base/useTable/types'
 import { WallPost, primaryKey } from '@/services/wall/models/Wall.model'
 import { addBeforeExitHook } from '@/utils/beforeExitHook'
-import { logEvent } from '@/utils/logEvent'
+import { justLog } from '@/utils/justLog'
 
 export const wallStore = useStore<WallPost, typeof primaryKey>(
   'wall',
@@ -15,5 +15,5 @@ export const wallStore = useStore<WallPost, typeof primaryKey>(
  */
 
 addBeforeExitHook(() =>
-  logEvent('wallStore has', wallStore.length(), 'records. Will be transported'),
+  justLog.info('wallStore has', wallStore.length(), 'records'),
 )
