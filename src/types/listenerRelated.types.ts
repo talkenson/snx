@@ -6,6 +6,7 @@ import {
 import { EventDrivenListenerFunction } from '@/transporters/websocket/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { ControllerContext } from '@/types/controllerRelated.types'
+import { z } from 'zod'
 
 export type EventName = string
 
@@ -16,6 +17,7 @@ export type ListenerMetadata = {
   description?: string
   requireAuth?: boolean
   restMethods?: RestMethod[]
+  validator?: z.ZodSchema
 }
 
 export type AddListenerFirstArgument = EventName | ListenerMetadata
@@ -36,7 +38,7 @@ export type ListenerWrapperOptions<T extends AnySourceDrivenListenerFunction> =
     ? {
         restMethods: RestMethod[]
       }
-    : never
+    : unknown
 
 export type ListenerWrapper<T extends AnySourceDrivenListenerFunction> = {
   options?: ListenerWrapperOptions<T>

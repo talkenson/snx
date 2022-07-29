@@ -12,9 +12,11 @@ export const jsonParseError = (app: express.Express) =>
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
       return res.status(400).send({
         status: 'rejected',
-        reason: 'JSON_PARSE_ERROR',
-        // @ts-ignore
-        message: err.message,
+        result: {
+          reason: 'JSON_PARSE_ERROR',
+          // @ts-ignore
+          message: err.message,
+        },
       }) // Bad request
     }
     next()

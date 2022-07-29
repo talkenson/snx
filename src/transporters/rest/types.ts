@@ -1,5 +1,5 @@
 import { Response, Router } from 'express'
-import { GraphItem } from '@/services/schema/models/GraphItem.model'
+import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 import { Controller, ControllerContext } from '@/types/controllerRelated.types'
 import {
   EventName,
@@ -33,4 +33,4 @@ export type RestListenerMap = Map<
 
 export type RestControllerRegistrar = (
   router: Router,
-) => (controllers: Controller[], graph: GraphItem[]) => Promise<void>
+) => (controllers: Controller[], graph: SchemaItem[]) => Promise<void>

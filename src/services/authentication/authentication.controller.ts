@@ -5,6 +5,8 @@ import {
   AuthStrategy,
   RegisterCredentials,
   RegisterStrategy,
+  ZodAuthCredentials,
+  ZodRegisterCredentials,
 } from './models/Strategy.model'
 import { createController } from '@/common/createController'
 import { REFRESH_TOKEN_LENGTH } from '@/config/secrets'
@@ -28,6 +30,7 @@ export const registerAuthenticateController: Controller = createController({
         eventName: 'auth',
         description:
           'Authentication with login/pass pair, or session prolongation with old AccessToken and its RefreshToken',
+        validator: ZodAuthCredentials,
       },
       (resolve, reject) => (payload: AuthCredentials) => {
         if (payload.strategy === AuthStrategy.Local) {
@@ -88,6 +91,7 @@ export const registerAuthenticateController: Controller = createController({
         eventName: 'register',
         transports: ['ws', 'rest', 'broker'],
         description: 'Registration with login/pass pair',
+        validator: ZodRegisterCredentials,
       },
       (resolve, reject, context) => (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {

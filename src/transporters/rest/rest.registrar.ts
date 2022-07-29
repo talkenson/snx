@@ -2,13 +2,12 @@ import { Router } from 'express'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
-import { GraphItem } from '@/services/schema/models/GraphItem.model'
 import {
   RestControllerRegistrar,
   RestListenerMap,
+  RestMethod,
   RestResponse,
 } from '@/transporters/rest/types'
-import { RestMethod } from '@/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { Controller, ControllerContext } from '@/types/controllerRelated.types'
 import {
@@ -16,11 +15,11 @@ import {
   ListenerFunction,
 } from '@/types/listenerRelated.types'
 import { exists } from '@/utils/exists'
-import { logEvent } from '@/utils/logEvent'
+import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 
 export const restRegistrar: RestControllerRegistrar =
   (router: Router) =>
-  async (controllers: Controller[], graphBase: GraphItem[]) => {
+  async (controllers: Controller[], graphBase: SchemaItem[]) => {
     const restListenerMap: RestListenerMap = new Map()
 
     const createRestResolve = (res: RestResponse) => (result: any) =>
@@ -63,20 +62,30 @@ export const restRegistrar: RestControllerRegistrar =
             options: {
               restMethods: metadata.restMethods || ['POST'],
             },
-            listener:
-              context =>
-              (res, ...params: any[]) => {
-                if (!authFlag || exists(context.user))
-                  return handler(
-                    createRestResolve(res),
-                    createRestReject(res),
-                    context,
-                  )(...params)
-                return handlerRestrictUnauthorized(
+            listener: context => (res, payload: any) => {
+              if (metadata.validator) {
+                const validation = metadata.validator.safeParse(payload)
+                if (validation && !validation.success) {
+                  return createRestReject(res)({
+                    reason: 'INVALID_PAYLOAD',
+                    description: validation.error.errors.map(
+                      ({ path, code, message }) => ({
+                        path,
+                        code,
+                        message,
+                      }),
+                    ),
+                  })
+                }
+              }
+              if (!authFlag || exists(context.user))
+                return handler(
+                  createRestResolve(res),
                   createRestReject(res),
                   context,
-                )
-              },
+                )(payload)
+              return handlerRestrictUnauthorized(createRestReject(res), context)
+            },
           })
         }
 
@@ -130,16 +139,18 @@ export const restRegistrar: RestControllerRegistrar =
 
     restListenerMap.forEach(({ options, listener: listenerFn }, eventName) => {
       router.all(`/${eventName}`, (req, res) => {
-        if (options?.restMethods.includes(<RestMethod>req.method))
+        if (options?.restMethods.includes(<RestMethod>req.method)) {
           return listenerFn({
             transport: 'rest',
             user: res.locals.user,
             clientId: res.locals.clientId,
             event: eventName,
-          })(res, req.body)
-        return res
-          .status(404)
-          .send({ reason: 'NOT_FOUND', supported: options?.restMethods })
+          })(res, { ...req.query, ...req.body })
+        } else {
+          return res
+            .status(404)
+            .json({ reason: 'NOT_FOUND', supported: options?.restMethods })
+        }
       })
     })
 

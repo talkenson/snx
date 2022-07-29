@@ -1,9 +1,10 @@
+import { z } from 'zod'
+
 export enum AuthStrategy {
   Local = 'local',
   External = 'external',
   RefreshToken = 'refreshToken',
   VK = 'vk',
-  // Google = 'google'
 }
 
 export enum RegisterStrategy {
@@ -12,46 +13,56 @@ export enum RegisterStrategy {
   VK = 'vk',
 }
 
-export type AuthCredentials<S extends AuthStrategy = AuthStrategy> =
-  S extends AuthStrategy.Local
-    ? {
-        strategy: S
-        login: string
-        password: string
-        clientId?: string
-      }
-    : S extends AuthStrategy.External
-    ? {
-        strategy: S
-        userId: number
-        signature: string
-      }
-    : S extends AuthStrategy.RefreshToken
-    ? {
-        strategy: S
-        refreshToken: string
-        oldAccessToken: string
-      }
-    : S extends AuthStrategy.VK
-    ? {
-        strategy: S
-        userId: number
-        signature: string
-      }
-    : never
+export const ZodAuthCredentials = z.discriminatedUnion('strategy', [
+  z.object({ strategy: z.literal(AuthStrategy.Local) }).merge(
+    z.object({
+      login: z.string(),
+      password: z.string(),
+      clientId: z.string().optional(),
+    }),
+  ),
+  z.object({ strategy: z.literal(AuthStrategy.RefreshToken) }).merge(
+    z.object({
+      refreshToken: z.string(),
+      oldAccessToken: z.string(),
+    }),
+  ),
+  z.object({ strategy: z.literal(AuthStrategy.VK) }).merge(
+    z.object({
+      userId: z.number(),
+      signature: z.string(),
+    }),
+  ),
+  z.object({ strategy: z.literal(AuthStrategy.External) }).merge(
+    z.object({
+      userId: z.number(),
+      signature: z.string(),
+    }),
+  ),
+])
 
-export type RegisterCredentials<S extends RegisterStrategy = RegisterStrategy> =
-  S extends RegisterStrategy.Local
-    ? {
-        strategy: S
-        login: string
-        password: string
-        clientId?: string
-      }
-    : S extends RegisterStrategy.VK
-    ? {
-        strategy: S
-        vkUserId: number
-        signature: string
-      }
-    : never
+export type AuthCredentials = z.infer<typeof ZodAuthCredentials>
+
+export const ZodRegisterCredentials = z.discriminatedUnion('strategy', [
+  z.object({ strategy: z.literal(RegisterStrategy.Local) }).merge(
+    z.object({
+      login: z.string(),
+      password: z.string(),
+      clientId: z.string().optional(),
+    }),
+  ),
+  z.object({ strategy: z.literal(RegisterStrategy.VK) }).merge(
+    z.object({
+      userId: z.number(),
+      signature: z.string(),
+    }),
+  ),
+  z.object({ strategy: z.literal(RegisterStrategy.External) }).merge(
+    z.object({
+      userId: z.number(),
+      signature: z.string(),
+    }),
+  ),
+])
+
+export type RegisterCredentials = z.infer<typeof ZodRegisterCredentials>

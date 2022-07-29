@@ -11,7 +11,6 @@ import {
   BrokerRequestPayload,
   BrokerSubscription,
 } from '@/transporters/broker/types'
-import { EventListenerMap } from '@/transporters/websocket/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { Controller, ControllerContext } from '@/types/controllerRelated.types'
 import {
@@ -72,6 +71,24 @@ export const brokerRegistrar: BrokerControllerRegistrar =
             listener:
               (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
+                if (metadata.validator) {
+                  const validation = metadata.validator.safeParse(params)
+                  if (validation && !validation.success) {
+                    return createReject(
+                      fullEventRouteName,
+                      hash,
+                    )({
+                      reason: 'INVALID_PAYLOAD',
+                      description: validation.error.errors.map(
+                        ({ path, code, message }) => ({
+                          path,
+                          code,
+                          message,
+                        }),
+                      ),
+                    })
+                  }
+                }
                 if (!authFlag || exists(context.user))
                   return handler(
                     createResolve(fullEventRouteName, hash),

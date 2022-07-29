@@ -1,0 +1,43 @@
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider = "zod-prisma"
+  output                   = "./zod" // (default) the directory where generated zod schemas will be saved
+  relationModel            = true // (default) Create and export both plain and related models.
+  // relationModel         = "default" // Do not export model without relations.
+  // relationModel         = false // Do not generate related model
+
+  modelCase                = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+  // modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
+
+  modelSuffix              = "Model" // (default) Suffix to apply to your prisma models when naming Zod schemas
+}
+
+model User {
+  userId    Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String?
+  avatar    String?
+  posts     Post[]
+}
+
+model Post {
+  id        Int         @id @default(autoincrement())
+  author    User?       @relation(fields: [authorId], references: [userId])
+  authorId  Int?
+  createdAt DateTime    @default(now())
+  type      ContentType
+  data      String
+}
+
+enum ContentType {
+  Text
+  Picture
+}

@@ -20,11 +20,11 @@ export const websocketRegistrar: EventControllerRegistrar =
   async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
 
-    const createSocketResolve =
+    const createResolve =
       (fullEventName: string, hash: string) => (result: any) =>
         emit(`${fullEventName}.resolved`, socket, hash)(result)
 
-    const createSocketReject =
+    const createReject =
       (fullEventName: string, hash: string) => (result: any) =>
         emit(`${fullEventName}.rejected`, socket, hash)(result)
 
@@ -50,14 +50,32 @@ export const websocketRegistrar: EventControllerRegistrar =
             listener:
               (context: ControllerContext) =>
               (hash: string, ...params: any[]) => {
+                if (metadata.validator) {
+                  const validation = metadata.validator.safeParse(params)
+                  if (validation && !validation.success) {
+                    return createReject(
+                      fullEventRouteName,
+                      hash,
+                    )({
+                      reason: 'INVALID_PAYLOAD',
+                      description: validation.error.errors.map(
+                        ({ path, code, message }) => ({
+                          path,
+                          code,
+                          message,
+                        }),
+                      ),
+                    })
+                  }
+                }
                 if (!authFlag || exists(context.user))
                   return handler(
-                    createSocketResolve(fullEventRouteName, hash),
-                    createSocketReject(fullEventRouteName, hash),
+                    createResolve(fullEventRouteName, hash),
+                    createReject(fullEventRouteName, hash),
                     context,
                   )(...params)
                 return handlerRestrictUnauthorized(
-                  createSocketReject(fullEventRouteName, hash),
+                  createReject(fullEventRouteName, hash),
                 )
               },
           })
@@ -66,7 +84,7 @@ export const websocketRegistrar: EventControllerRegistrar =
         const setFallbackEventListener = () => {
           eventListenerMap.set(fullEventRouteName, {
             listener: () => (hash: string) => {
-              createSocketReject(
+              createReject(
                 fullEventRouteName,
                 hash,
               )({
@@ -112,14 +130,13 @@ export const websocketRegistrar: EventControllerRegistrar =
      */
 
     eventListenerMap.forEach(({ listener: listenerFn }, eventName) => {
-      socket.on(
-        eventName,
+      socket.on(eventName, (hash, ...args) =>
         listenerFn({
           transport: 'ws',
           user: user,
           clientId: clientId,
           event: eventName,
-        }),
+        })(hash, ...args),
       )
     })
 
