@@ -7,37 +7,311 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator zod {
-  provider = "zod-prisma"
-  output                   = "./zod" // (default) the directory where generated zod schemas will be saved
-  relationModel            = true // (default) Create and export both plain and related models.
-  // relationModel         = "default" // Do not export model without relations.
-  // relationModel         = false // Do not generate related model
-
-  modelCase                = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
-  // modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
-
-  modelSuffix              = "Model" // (default) Suffix to apply to your prisma models when naming Zod schemas
+model Account {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  Profile  Profile?
 }
 
-model User {
-  userId    Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  name      String?
-  avatar    String?
-  posts     Post[]
+enum Frequency {
+  Never
+  Sometimes
+  Often
+  Usually
 }
 
-model Post {
-  id        Int         @id @default(autoincrement())
-  author    User?       @relation(fields: [authorId], references: [userId])
-  authorId  Int?
-  createdAt DateTime    @default(now())
-  type      ContentType
-  data      String
+enum Interests {
+  SelfCare
+  Calligraphy
+  Meditation
+  Sushi
+  Hockey
+  Basketball
+  HomeWorkout
+  Manga
+  Makeup
+  Aquarium
+  Instagram
+  MartialArts
+  Marvel
+  Jogging
+  Running
+  Travel
+  Languages
+  Movies
+  Gym
+  SocialNetworks
+  SkinCare
+  Cricket
+  Skateboard
+  Vegan
+  KPop
+  Photography
+  Reading
+  Vocals
+  Volleyball
+  Sports
+  Poetry
+  StandUp
+  Coffee
+  Dota2
+  Karaoke
+  Fortnite
+  Pubg
+  Diving
+  NFT
+  AlcoholicTrip
+  Baseball
+  Ballet
+  Feminism
+  Quests
+  Shopping
+  Food
+  Clothes
+  Memes
+  CountryMusic
+  Motorsports
+  Football
+  ACapella
+  Investment
+  GalleryOfArts
+  Hiking
+  Mountains
+  Bowing
+  Talkiiing
+  Fishing
+  IceCream
+  Skates
+  Parties
+  Skiing
+  Snowboarding
+  Pilates
+  Clubs
+  Broadway
+  Cheerleading
+  Choir
+  AutoRacing
+  BikeRacing
+  Content
+  Cybersports
+  Concerts
+  RockClimbing
+  Bakery
+  Camping
+  Blogging
+  Collecting
+  RussianRap
+  RussianRock
+  Automobiles
+  Startups
+  BubbleTea
+  Series
+  Songwriting
+  Tattoos
+  Drawing
+  SupSurfing
+  Surfing
+  Bambindon
+  Bowling
+  ActiveLifestyle
+  Fashion
+  Anime
+  Astrology
+  MBTI
+  Entrepreneurship
+  Cooking
+  Fencing
+  Soccer
+  Arts
+  DIY
+  Politics
+  Museums
+  OutdoorWorkouts
+  TikTok
+  Activism
+  Picnic
+  Twitch
+  Comedy
+  Music
+  Triathlon
+  Netflix
+  Disney
+  RealEstate
+  Podcasts
+  Rave
+  BBQ
+  BBC
+  CraftBeer
+  Swimming
+  Cryptocurrency
+  ColdTea
+  Drums
+  Tea
+  TableGames
+  Quiz
+  Volunteering
+  TableTennis
+  RollerSkating
+  Wine
+  Linux
+  DungeonsAndDragons
+  ElectronicMusic
+  Yoga
+  Boxing
+  Ramen
 }
 
-enum ContentType {
-  Text
-  Picture
+enum LookingFor {
+  Love
+  Friendship
+  LikeMinded
+}
+
+enum MaritalStatus {
+  Free
+  Friendship
+  Complicated
+  Busy
+}
+
+enum Personality {
+  Introvert
+  Ambivert
+  Extravert
+  INTJ
+  INTP
+  INFJ
+  INFP
+  ISTJ
+  ISTP
+  ISFJ
+  ISFP
+  ENTJ
+  ENTP
+  ENFJ
+  ENFP
+  ESTJ
+  ESTP
+  ESFJ
+  ESFP
+}
+
+enum Sex {
+  Male
+  Female
+  Helicopter
+}
+
+enum SparkType {
+  Like
+  Dislike
+}
+
+enum Zodiac {
+  Aries
+  Taurus
+  Gemini
+  Cancer
+  Leo
+  Virgo
+  Libra
+  Scorpio
+  Sagittarius
+  Capricorn
+  Aquarius
+  Pisces
+}
+
+model Work {
+  id Int @id @default(autoincrement())
+
+  place    String?
+  position String
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int     @unique
+}
+
+model Graduate {
+  id Int @id @default(autoincrement())
+
+  place      String?
+  speciality String
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int     @unique
+}
+
+model Contacts {
+  id Int @id @default(autoincrement())
+
+  instagram String?
+  telegram  String?
+  twitter   String?
+  vk        String?
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int     @unique
+}
+
+model Profile {
+  id Int @id @default(autoincrement())
+
+  // For now user can have only one profile, so @unique
+  accountId Int     @unique
+  account   Account @relation(fields: [accountId], references: [id])
+
+  name                String
+  age                 Int
+  searchAgeBoundaries Int[]
+  sex                 Sex
+
+  height        Int?
+  weight        Int?
+  lookingFor    LookingFor?
+  maritalStatus MaritalStatus?
+  smoking       Frequency?
+  alcohol       Frequency?
+  personality   Personality?
+  zodiac        Zodiac?
+  about         String?
+  interests     Interests[]
+
+  work     Work?
+  graduate Graduate?
+
+  contacts Contacts?
+
+  initiatedSparks Spark[] @relation(name: "sparkInitiatorRelation")
+  recipientSparks Spark[] @relation(name: "sparkRecipientRelation")
+
+  notifications SparkNotification[] @relation(name: "sparkTargetProfileRelation")
+}
+
+model Spark {
+  id Int @id @default(autoincrement())
+
+  initiatorId Int
+  initiator   Profile   @relation(name: "sparkInitiatorRelation", fields: [initiatorId], references: [id])
+  recipientId Int
+  recipient   Profile   @relation(name: "sparkRecipientRelation", fields: [recipientId], references: [id])
+  isSubmitted Boolean   @default(false)
+  sparkType   SparkType
+  createdAt   DateTime  @default(now())
+  submittedAt DateTime
+
+  notifications SparkNotification[] @relation(name: "sparkNotificationRelation")
+}
+
+
+model SparkNotification {
+  id Int @id @default(autoincrement())
+
+  sparkId Int
+  spark   Spark   @relation(name: "sparkNotificationRelation", fields: [sparkId], references: [id])
+  profileId Int
+  profile   Profile   @relation(name: "sparkTargetProfileRelation", fields: [profileId], references: [id])
+  isRead Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 }
