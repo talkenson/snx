@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { User } from '@/services/users/models/User.model'
+import { User } from '@/services/profile/models/User.model'
 
 export type SocketMap = {
   socketId: Socket['id']

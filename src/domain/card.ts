@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Profile } from '@/domain/profile'
+import { Profile } from '@/domain/profileType'
 
 const Card = Profile.omit({
   contacts: true,

@@ -5,6 +5,8 @@ import { createControllerRegistrar } from '@/common/createControllerRegistrators
 import { registerAuthenticateController } from '@/services/authentication/authentication.controller'
 import { registerWallController } from '@/services/wall/wall.controller'
 import { justLog } from '@/utils/justLog'
+import { prisma } from '@/db'
+import { registerProfileController } from '@/services/profile/profile.controller'
 
 justLog.info('Creating registration handles...')
 
@@ -15,6 +17,15 @@ export const {
   registerAllRestControllers,
   registerAllBrokerControllers,
 } = createControllerRegistrar(
-  [registerAuthenticateController, registerWallController],
-  { ws: { io: ioServer }, rest: { router }, broker: { subscription } },
+  [
+    registerAuthenticateController,
+    registerWallController,
+    registerProfileController,
+  ],
+  {
+    prisma: prisma,
+    ws: { io: ioServer },
+    rest: { router },
+    broker: { subscription },
+  },
 )

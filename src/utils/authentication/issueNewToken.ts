@@ -6,34 +6,46 @@ import {
   JWT_LIFETIME_SEC,
   REFRESH_TOKEN_LENGTH,
 } from '@/config/secrets'
-import { Credentials } from '@/services/authentication/models/Credentials.model'
-import authenticationStore from '@/services/authentication/stores/authentication.store'
+import { Account } from '@/domain/account'
 import { getClientId } from '@/utils/authentication/getClientId'
+import { getToken } from '@/utils/authentication/repo'
+import { exists } from '@/utils/exists'
+import profileCacheStore from '@/services/profile/stores/profileCache.store'
 
-export const issueNewToken = (
-  auth: Credentials,
+export const issueNewToken = async (
+  auth: Pick<Account, 'email' | 'id' | 'profile'>,
+  refreshTokenUpdater: (
+    accountId: Account['id'],
+    clientId: string,
+    newToken: string,
+  ) => Promise<unknown>,
   clientId?: string,
   useOldRefreshToken?: boolean,
 ) => {
-  const actualRefreshToken = useOldRefreshToken
-    ? auth.refreshChain[getClientId(clientId)].token
-    : nanoid(REFRESH_TOKEN_LENGTH)
-  if (!useOldRefreshToken) {
-    authenticationStore.reduceUpdate(auth.userId, data => ({
-      ...data,
-      refreshChain: {
-        ...data.refreshChain,
-        [getClientId(clientId)]: {
-          token: actualRefreshToken,
-        },
-      },
-    }))
+  const safeClientId = getClientId(clientId)
+  let actualRefreshToken = ''
+  if (useOldRefreshToken) {
+    const tokenData = await getToken(auth.id, safeClientId)
+    if (exists(tokenData)) {
+      actualRefreshToken = tokenData.token
+    } else {
+      actualRefreshToken = nanoid(REFRESH_TOKEN_LENGTH)
+      await refreshTokenUpdater(auth.id, safeClientId, actualRefreshToken)
+    }
+  } else {
+    actualRefreshToken = nanoid(REFRESH_TOKEN_LENGTH)
+    await refreshTokenUpdater(auth.id, safeClientId, actualRefreshToken)
   }
   return {
-    userId: auth.userId,
-    login: auth.login,
+    userId: auth.id,
+    email: auth.email,
     token: jwt.sign(
-      { userId: auth.userId, clientId: getClientId(clientId) },
+      {
+        userId: auth.id,
+        profileId:
+          auth.profile?.id || profileCacheStore.get(auth.id)?.profileId || -1,
+        clientId: safeClientId,
+      },
       JWT_KEY,
       {
         expiresIn: JWT_LIFETIME_SEC,

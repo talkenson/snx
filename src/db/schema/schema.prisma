@@ -7,11 +7,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model RefreshTokenRecord {
+  id        Int      @id @default(autoincrement())
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
+  clientId  String
+  token     String   @unique
+  issuedAt  DateTime @default(now())
+
+  @@unique([accountId, clientId])
+}
+
 model Account {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String
-  Profile  Profile?
+  id            Int                  @id @default(autoincrement())
+  email         String               @unique
+  password      String
+  profile       Profile?             @relation()
+  refreshChains RefreshTokenRecord[] @relation()
 }
 
 enum Frequency {
@@ -304,14 +316,13 @@ model Spark {
   notifications SparkNotification[] @relation(name: "sparkNotificationRelation")
 }
 
-
 model SparkNotification {
   id Int @id @default(autoincrement())
 
-  sparkId Int
-  spark   Spark   @relation(name: "sparkNotificationRelation", fields: [sparkId], references: [id])
+  sparkId   Int
+  spark     Spark    @relation(name: "sparkNotificationRelation", fields: [sparkId], references: [id])
   profileId Int
-  profile   Profile   @relation(name: "sparkTargetProfileRelation", fields: [profileId], references: [id])
-  isRead Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  profile   Profile  @relation(name: "sparkTargetProfileRelation", fields: [profileId], references: [id])
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

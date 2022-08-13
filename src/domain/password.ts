@@ -5,7 +5,7 @@ export const RawPassword = z
   .string()
   .min(8)
   .max(64)
-  .regex(/^[\wа-яё \-+=*%#$^@()\[\]\\\/]*$/i)
+  .regex(/^[\wа-яё \-+=*%#$^@()[\]\\/]*$/i)
 
 export type RawPassword = z.infer<typeof RawPassword>
 

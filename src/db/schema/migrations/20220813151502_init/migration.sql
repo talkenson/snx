@@ -23,6 +23,17 @@ CREATE TYPE "SparkType" AS ENUM ('Like', 'Dislike');
 CREATE TYPE "Zodiac" AS ENUM ('Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces');
 
 -- CreateTable
+CREATE TABLE "RefreshTokenRecord" (
+    "id" SERIAL NOT NULL,
+    "accountId" INTEGER NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "issuedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "RefreshTokenRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Account" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
@@ -110,6 +121,12 @@ CREATE TABLE "SparkNotification" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "RefreshTokenRecord_token_key" ON "RefreshTokenRecord"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RefreshTokenRecord_accountId_clientId_key" ON "RefreshTokenRecord"("accountId", "clientId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Account_email_key" ON "Account"("email");
 
 -- CreateIndex
@@ -123,6 +140,9 @@ CREATE UNIQUE INDEX "Contacts_profileId_key" ON "Contacts"("profileId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Profile_accountId_key" ON "Profile"("accountId");
+
+-- AddForeignKey
+ALTER TABLE "RefreshTokenRecord" ADD CONSTRAINT "RefreshTokenRecord_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Work" ADD CONSTRAINT "Work_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -14,54 +14,66 @@ const Age = z
   .min(18, 'u so yong lol')
   .max(80, 'u so ancient senior')
 
-export const Profile = z.object({
-  id: z.number().int(),
-  accountId: Account.shape.id,
-
+export const ProfileInput = z.object({
   name: z.string().regex(latinAndCyrillic),
 
   age: Age,
-  searchAgeBoundaries: z.tuple([Age, Age]).optional(),
+  searchAgeBoundaries: z
+    .array(Age)
+    .length(2, 'Incorrect age boundaries')
+    .optional(),
 
   sex: z.nativeEnum(Sex),
   height: z
     .number()
     .min(25, 'you so smol lol')
     .max(250, 'you so big lol')
-    .optional(),
-  weight: z.number().min(25).max(500).optional(),
-  lookingFor: z.nativeEnum(LookingFor).default(LookingFor.Love).optional(),
-  maritalStatus: z.nativeEnum(MaritalStatus).optional(),
-  smoking: z.nativeEnum(Frequency).optional(),
-  alcohol: z.nativeEnum(Frequency).optional(),
-  personality: z.nativeEnum(Personality).optional(),
-  about: z.string().max(300).optional(),
+    .nullish(),
+  weight: z.number().min(25).max(500).nullish(),
+  lookingFor: z.nativeEnum(LookingFor).default(LookingFor.Love).nullish(),
+  maritalStatus: z.nativeEnum(MaritalStatus).nullish(),
+  smoking: z.nativeEnum(Frequency).nullish(),
+  alcohol: z.nativeEnum(Frequency).nullish(),
+  personality: z.nativeEnum(Personality).nullish(),
+  about: z.string().max(300).nullish(),
   interests: z.array(z.nativeEnum(Interests)).min(3).max(10),
 
   work: z
     .object({
-      place: z.string().max(50).optional(),
+      place: z.string().max(50).nullish(),
       position: z.string().max(25),
     })
     .optional(),
   graduate: z
     .object({
-      place: z.string().max(50).optional(),
+      place: z.string().max(50).nullish(),
       speciality: z.string().max(25),
     })
     .optional(),
 
   contacts: z
     .object({
-      instagram: z.string(),
-      telegram: z.string(),
-      twitter: z.string(),
-      vk: z.string(),
+      instagram: z.string().nullable(),
+      telegram: z.string().nullable(),
+      twitter: z.string().nullable(),
+      vk: z.string().nullable(),
     })
     .partial()
-    .refine(obj => Object.keys(obj).length > 0),
+    .refine(obj => Object.keys(obj).length > 0)
+    .optional(),
 })
 
+export const Profile = z
+  .object({
+    id: z.number().int(),
+    accountId: z.number().int(),
+  })
+  .merge(ProfileInput)
+
+export const ProfilePatchInput = ProfileInput.partial()
+
+export type ProfileInput = z.infer<typeof ProfileInput>
+export type ProfilePatchInput = z.infer<typeof ProfilePatchInput>
 export type Profile = z.infer<typeof Profile>
 
 export const DEFAULT_AGE_DELTA = 3

@@ -1,5 +1,5 @@
 export enum LookingFor {
-  Love,
-  Friendship,
-  LikeMinded,
+  Love = 'Love',
+  Friendship = 'Friendship',
+  LikeMinded = 'LikeMinded',
 }
