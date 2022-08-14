@@ -16,9 +16,9 @@ import {
   AddListenerFirstArgument,
   ListenerFunction,
 } from '@/types/listenerRelated.types'
+import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 import { parseJSON } from '@/utils/parseJSON'
-import { RegistrarInjection } from '@/types/registrar.types'
 
 const brokerStringCodec = StringCodec()
 

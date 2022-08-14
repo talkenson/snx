@@ -1,7 +1,7 @@
 import { createController } from '@/common/createController'
-import { Controller } from '@/types/controllerRelated.types'
-import { profileRepo } from '@/services/profile/profile.repo'
 import { Profile, ProfileInput, ProfilePatchInput } from '@/domain/profile'
+import { profileRepo } from '@/services/profile/profile.repo'
+import { Controller } from '@/types/controllerRelated.types'
 import { exists } from '@/utils/exists'
 import { justLog } from '@/utils/justLog'
 import { excludeKeys } from '@/utils/security/excludeKeys'
@@ -95,5 +95,17 @@ export const registerProfileController: Controller<
         }
       },
     )
+
+    /*addListener(
+      {
+        eventName: 'mock',
+        description: 'Insert prepared 100 profiles',
+        requireAuth: true,
+        restMethods: ['GET', 'POST'],
+      },
+      (resolve, reject, context) => async () => {
+        return resolve({ res: repository.mock() })
+      },
+    )*/
   },
 })

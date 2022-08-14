@@ -311,9 +311,11 @@ model Spark {
   isSubmitted Boolean   @default(false)
   sparkType   SparkType
   createdAt   DateTime  @default(now())
-  submittedAt DateTime
+  submittedAt DateTime?
 
   notifications SparkNotification[] @relation(name: "sparkNotificationRelation")
+
+  @@unique([initiatorId, recipientId])
 }
 
 model SparkNotification {

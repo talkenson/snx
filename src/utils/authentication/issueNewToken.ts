@@ -7,10 +7,10 @@ import {
   REFRESH_TOKEN_LENGTH,
 } from '@/config/secrets'
 import { Account } from '@/domain/account'
+import profileCacheStore from '@/services/profile/stores/profileCache.store'
 import { getClientId } from '@/utils/authentication/getClientId'
 import { getToken } from '@/utils/authentication/repo'
 import { exists } from '@/utils/exists'
-import profileCacheStore from '@/services/profile/stores/profileCache.store'
 
 export const issueNewToken = async (
   auth: Pick<Account, 'email' | 'id' | 'profile'>,

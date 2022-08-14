@@ -13,8 +13,8 @@ import {
   AddListenerFirstArgument,
   ListenerFunction,
 } from '@/types/listenerRelated.types'
-import { exists } from '@/utils/exists'
 import { RegistrarInjection } from '@/types/registrar.types'
+import { exists } from '@/utils/exists'
 
 export const websocketRegistrar =
   ({ prisma }: RegistrarInjection): EventControllerRegistrar =>

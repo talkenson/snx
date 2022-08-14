@@ -1,7 +1,10 @@
+import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
+import { Account } from '@/domain/account'
 import { Profile } from '@/domain/profile'
 import profileCacheStore from '@/services/profile/stores/profileCache.store'
-import { Account } from '@/domain/account'
+import { exists } from '@/utils/exists'
+import mockPersons from '@/utils/mock/persons.json'
 
 export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async checkIfProfileExists(accountId: Account['id']) {
@@ -74,7 +77,7 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
     return updatedProfile
   },
   async getProfile(profileId: Profile['id']) {
-    return await prisma.profile.findUnique({
+    const profile = await prisma.profile.findUnique({
       where: {
         id: profileId,
       },
@@ -84,5 +87,25 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
         graduate: true,
       },
     })
+    if (exists(profile)) {
+      profileCacheStore.insert(profile.accountId, {
+        accountId: profile.accountId,
+        profileId: profile.id,
+      })
+    }
+    return profile
+  },
+  async mock() {
+    /*const createdAccounts = await prisma.account.createMany({
+      data: Array.from({ length: 100 }, () => ({
+        email: faker.internet.email(),
+        password: faker.internet.password(10),
+      })),
+    })*/
+    /*const createdProfiles = await prisma.profile.createMany({
+      data: mockPersons.map((p, i) => ({ ...p, accountId: 6 + i })),
+    })
+    return createdProfiles*/
+    //return createdAccounts
   },
 })

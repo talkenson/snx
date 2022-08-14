@@ -10,7 +10,6 @@ import {
 import { createController } from '@/common/createController'
 import { Account } from '@/domain/account'
 import { authenticationRepo } from '@/services/authentication/authentication.repo'
-import { authenticationStore } from '@/services/authentication/stores'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
 import { issueNewToken } from '@/utils/authentication/issueNewToken'
@@ -123,14 +122,20 @@ export const registerAuthenticateController = createController({
         description: 'Registration with email/pass pair',
         validator: ZodRegisterCredentials,
       },
-      (resolve, reject, context) => (payload: RegisterCredentials) => {
+      (resolve, reject, context) => async (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
           if (!exists(payload.email) || !exists(payload.password))
             return reject({ reason: 'BAD_CREDENTIALS' })
-          const auth = authenticationStore.find(
-            authInfo => authInfo.login === payload.email,
+
+          const isEmailExist = await repository.checkIfEmailExists(
+            payload.email,
           )
-          if (exists(auth)) return reject({ reason: 'USER_ALREADY_EXISTS' })
+
+          if (isEmailExist) {
+            return reject({
+              reason: 'EMAIL_ALREADY_REGISTERED',
+            })
+          }
 
           bcrypt.hash(payload.password, 10, async (err, hash) => {
             if (err) {
@@ -138,16 +143,6 @@ export const registerAuthenticateController = createController({
                 reason: 'CANT_SOLVE_PASSWORD',
                 err: JSON.stringify(err),
                 message: 'Please, contact maintainer',
-              })
-            }
-
-            const isEmailExist = await repository.checkIfEmailExists(
-              payload.email,
-            )
-
-            if (isEmailExist) {
-              return reject({
-                reason: 'EMAIL_ALREADY_REGISTERED',
               })
             }
 

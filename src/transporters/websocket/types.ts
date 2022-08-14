@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io'
+import { Profile } from '@/domain/profile'
 import { User } from '@/services/profile/models/User.model'
 import { Controller, ControllerContext } from '@/types/controllerRelated.types'
 import {
@@ -6,7 +7,6 @@ import {
   ListenerFunction,
   ListenerWrapper,
 } from '@/types/listenerRelated.types'
-import { Profile } from '@/domain/profile'
 
 export type EventDrivenListenerFunction = (
   context: ControllerContext,

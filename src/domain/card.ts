@@ -1,8 +1,13 @@
 import { z } from 'zod'
-import { Profile } from '@/domain/profileType'
+import { ProfileInput } from '@/domain/profile'
 
-const Card = Profile.omit({
+export const Card = ProfileInput.omit({
   contacts: true,
 })
 
-export type Card = z.infer<typeof Card>
+export const GetCardsPayload = z.object({
+  count: z.number().int().min(5).max(20).optional(),
+})
+
+export type GetCardsPayload = z.infer<typeof GetCardsPayload>
+export type Card = Omit<ProfileInput, 'contacts'>

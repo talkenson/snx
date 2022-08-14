@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { Account } from '@/domain/account'
 import { Frequency } from '@/domain/enums/frequency'
 import { Interests } from '@/domain/enums/interests'
 import { LookingFor } from '@/domain/enums/looking-for'
@@ -11,8 +10,11 @@ import { latinAndCyrillic } from '@/utils/domain/latinAndCyrillic'
 const Age = z
   .number()
   .int()
-  .min(18, 'u so yong lol')
-  .max(80, 'u so ancient senior')
+  .min(18, 'Our service is primarily 18+')
+  .max(
+    80,
+    'Sorry, no misunderstanding, we think that its to hard to find someone with our service',
+  )
 
 export const ProfileInput = z.object({
   name: z.string().regex(latinAndCyrillic),
@@ -26,8 +28,8 @@ export const ProfileInput = z.object({
   sex: z.nativeEnum(Sex),
   height: z
     .number()
-    .min(25, 'you so smol lol')
-    .max(250, 'you so big lol')
+    .min(50, 'Even newborn babies are longer')
+    .max(250, 'Sorry, its so hard for you to find a skyscraper here')
     .nullish(),
   weight: z.number().min(25).max(500).nullish(),
   lookingFor: z.nativeEnum(LookingFor).default(LookingFor.Love).nullish(),

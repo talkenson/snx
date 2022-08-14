@@ -1,12 +1,12 @@
+import { PrismaClient } from '@prisma/client'
 import { Router } from 'express'
 import { Server } from 'socket.io'
+import { Account } from '@/domain/account'
+import { Profile } from '@/domain/profile'
 import { User } from '@/services/profile/models/User.model'
 import { BrokerSubscription } from '@/transporters/broker/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { AddListenerFunction } from '@/types/listenerRelated.types'
-import { PrismaClient } from '@prisma/client'
-import { Account } from '@/domain/account'
-import { Profile } from '@/domain/profile'
 
 export type ControllerContext<
   T extends Record<string, unknown> = Record<string, unknown>,

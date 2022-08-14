@@ -1,6 +1,6 @@
+import { DateTime } from 'luxon'
 import { z } from 'zod'
 import { Account } from '@/domain/account'
-import { DateTime } from 'luxon'
 
 export const RefreshTokenRecord = z.object({
   id: z.number().int(),
