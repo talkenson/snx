@@ -13,10 +13,12 @@ import {
   AddListenerFirstArgument,
   ListenerFunction,
 } from '@/types/listenerRelated.types'
+import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 
-export const websocketRegistrar: EventControllerRegistrar =
-  (io: Server, socket: Socket, { user, clientId }) =>
+export const websocketRegistrar =
+  ({ prisma }: RegistrarInjection): EventControllerRegistrar =>
+  (io: Server, socket: Socket, { userId, profileId, clientId }) =>
   async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
 
@@ -68,7 +70,7 @@ export const websocketRegistrar: EventControllerRegistrar =
                     })
                   }
                 }
-                if (!authFlag || exists(context.user))
+                if (!authFlag || exists(context.userId))
                   return handler(
                     createResolve(fullEventRouteName, hash),
                     createReject(fullEventRouteName, hash),
@@ -122,6 +124,7 @@ export const websocketRegistrar: EventControllerRegistrar =
           controller.requireAuth,
           controller.transport,
         ),
+        controller.repository ? controller.repository({ prisma }) : undefined,
       )
     })
 
@@ -133,7 +136,8 @@ export const websocketRegistrar: EventControllerRegistrar =
       socket.on(eventName, (hash, ...args) =>
         listenerFn({
           transport: 'ws',
-          user: user,
+          userId: userId,
+          profileId: profileId,
           clientId: clientId,
           event: eventName,
         })(hash, ...args),

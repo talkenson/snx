@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io'
-import { User } from '@/services/users/models/User.model'
+import { Profile } from '@/domain/profile'
+import { User } from '@/services/profile/models/User.model'
 import { Controller, ControllerContext } from '@/types/controllerRelated.types'
 import {
   EventName,
@@ -20,8 +21,10 @@ export type EventListenerMap = Map<
 >
 
 export type ForeignContext = {
-  user?: User
+  userId?: number
   clientId: string
+  profileId?: number
+  profile?: Profile
 }
 
 export type EventControllerRegistrar = (

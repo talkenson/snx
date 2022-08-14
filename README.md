@@ -1,12 +1,15 @@
-# Poke
+# Foxy Backend
 
-Universal API backend package with WS and Rest JSON API
+Based on:
 
-## Запуск
+Póke - Universal API backend package with WS and Rest JSON API
 
-1. Поднимаем MongoDB локально
-2. Создаем `.env` по примеру `.env.sample`
-3. `npm run dev:nodemon` 
+## Setting up
 
-Обратите внимание, используется `Vite`, взаимодейсвтие с env изменено)
+1. Customize database schema (source) for Prisma
+2. Create `.env` from `.env.sample`
+3. Choose needed options
+4. Develop with `npm run dev:nodemon`
+
+We're using `Vite`, all env-vars named conventional
 

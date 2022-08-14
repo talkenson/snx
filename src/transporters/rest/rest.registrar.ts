@@ -15,9 +15,12 @@ import {
   AddListenerFirstArgument,
   ListenerFunction,
 } from '@/types/listenerRelated.types'
+import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
+import { justLog } from '@/utils/justLog'
 
-export const restRegistrar: RestControllerRegistrar =
+export const restRegistrar =
+  ({ prisma }: RegistrarInjection): RestControllerRegistrar =>
   (router: Router) =>
   async (controllers: Controller[], graphBase: SchemaItem[]) => {
     const restListenerMap: RestListenerMap = new Map()
@@ -78,12 +81,14 @@ export const restRegistrar: RestControllerRegistrar =
                   })
                 }
               }
-              if (!authFlag || exists(context.user))
+              justLog.log(context)
+              if (!authFlag || exists(context.userId)) {
                 return handler(
                   createRestResolve(res),
                   createRestReject(res),
                   context,
                 )(payload)
+              }
               return handlerRestrictUnauthorized(createRestReject(res), context)
             },
           })
@@ -130,6 +135,7 @@ export const restRegistrar: RestControllerRegistrar =
           controller.requireAuth,
           controller.transport,
         ),
+        controller.repository ? controller.repository({ prisma }) : undefined,
       )
     })
 
@@ -142,7 +148,8 @@ export const restRegistrar: RestControllerRegistrar =
         if (options?.restMethods.includes(<RestMethod>req.method)) {
           return listenerFn({
             transport: 'rest',
-            user: res.locals.user,
+            userId: res.locals.userId,
+            profileId: res.locals.profileId,
             clientId: res.locals.clientId,
             event: eventName,
           })(res, { ...req.query, ...req.body })

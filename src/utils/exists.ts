@@ -1,2 +1,4 @@
-export const exists = <T>(undefinable: T | undefined): undefinable is T =>
-  undefinable !== undefined
+export const exists = <T>(
+  undefinableOrNullable: T | undefined | null,
+): undefinableOrNullable is T =>
+  undefinableOrNullable !== undefined && undefinableOrNullable !== null

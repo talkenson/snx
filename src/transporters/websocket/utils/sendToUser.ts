@@ -1,4 +1,4 @@
-import { User } from '@/services/users/models/User.model'
+import { User } from '@/services/profile/models/User.model'
 import socketMapStore from '@/transporters/websocket/stores/socketMap.store'
 import { withIO } from '@/transporters/websocket/utils/withIO'
 

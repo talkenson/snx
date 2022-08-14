@@ -4,7 +4,6 @@ import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
 import { POKE_API_BROKER_PREFIX } from '@/config/secrets'
-import { User } from '@/services/users/models/User.model'
 import {
   BrokerControllerRegistrar,
   BrokerListenerMap,
@@ -17,6 +16,7 @@ import {
   AddListenerFirstArgument,
   ListenerFunction,
 } from '@/types/listenerRelated.types'
+import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 import { parseJSON } from '@/utils/parseJSON'
 
@@ -31,8 +31,10 @@ const createBrokerResponse = (
   return { status, eventName, hash, payload }
 }
 
-export const brokerRegistrar: BrokerControllerRegistrar =
-  (subscription: BrokerSubscription) => async (controllers: Controller[]) => {
+export const brokerRegistrar =
+  ({ prisma }: RegistrarInjection): BrokerControllerRegistrar =>
+  (subscription: BrokerSubscription) =>
+  async (controllers: Controller[]) => {
     const brokerListenerMap: BrokerListenerMap = new Map()
 
     const createResolve =
@@ -89,7 +91,7 @@ export const brokerRegistrar: BrokerControllerRegistrar =
                     })
                   }
                 }
-                if (!authFlag || exists(context.user))
+                if (!authFlag || exists(context.userId))
                   return handler(
                     createResolve(fullEventRouteName, hash),
                     createReject(fullEventRouteName, hash),
@@ -134,6 +136,7 @@ export const brokerRegistrar: BrokerControllerRegistrar =
           controller.requireAuth,
           controller.transport,
         ),
+        controller.repository ? controller.repository({ prisma }) : undefined,
       )
     })
 
@@ -150,7 +153,8 @@ export const brokerRegistrar: BrokerControllerRegistrar =
       if (listenerWrapper) {
         listenerWrapper.listener({
           transport: 'broker',
-          user: {} as User,
+          userId: -1,
+          profileId: -1,
           clientId: 'broker',
           event: payload.eventName,
         })(payload.hash, payload.payload)

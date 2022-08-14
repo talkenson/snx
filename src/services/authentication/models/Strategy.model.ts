@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { RawPassword } from '@/domain/password'
 
 export enum AuthStrategy {
   Local = 'local',
@@ -16,8 +17,8 @@ export enum RegisterStrategy {
 export const ZodAuthCredentials = z.discriminatedUnion('strategy', [
   z.object({ strategy: z.literal(AuthStrategy.Local) }).merge(
     z.object({
-      login: z.string(),
-      password: z.string(),
+      email: z.string().email(),
+      password: RawPassword,
       clientId: z.string().optional(),
     }),
   ),
@@ -46,8 +47,8 @@ export type AuthCredentials = z.infer<typeof ZodAuthCredentials>
 export const ZodRegisterCredentials = z.discriminatedUnion('strategy', [
   z.object({ strategy: z.literal(RegisterStrategy.Local) }).merge(
     z.object({
-      login: z.string(),
-      password: z.string(),
+      email: z.string().email(),
+      password: RawPassword,
       clientId: z.string().optional(),
     }),
   ),

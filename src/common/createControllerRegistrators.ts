@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client'
 import { Router } from 'express'
 import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 import { brokerRegistrar } from '@/transporters/broker/broker.registrar'
@@ -9,11 +10,15 @@ import {
 } from '@/types/controllerRelated.types'
 import { authenticationSocketMiddleware } from '@/utils/authentication/authenticationMiddleware'
 import { createGraph } from '@/utils/graph/createGraph'
-import { justLog } from '@/utils/justLog'
 
 export const createControllerRegistrar = (
-  controllers: Controller[],
-  { ws, rest, broker }: ControllerRegistrarParameters,
+  controllers: Controller<any>[],
+  {
+    ws,
+    rest,
+    broker,
+    prisma,
+  }: ControllerRegistrarParameters & { prisma: PrismaClient },
 ): {
   registerAllEventControllers: () => void
   registerAllRestControllers: () => Router
@@ -24,13 +29,15 @@ export const createControllerRegistrar = (
     ws.io.on('connection', socket => {
       authenticationSocketMiddleware(
         socket.client.request.headers.authorization,
-      ).then(context => websocketRegistrar(ws.io, socket, context)(controllers))
+      ).then(context =>
+        websocketRegistrar({ prisma })(ws.io, socket, context)(controllers),
+      )
     })
   }
 
   const registerAllRestControllers = () => {
     const schema: SchemaItem[] = []
-    restRegistrar(rest.router)(controllers, schema)
+    restRegistrar({ prisma })(rest.router)(controllers, schema)
     const builtSchema = createGraph(schema)
     rest.router.get('/', (req, res) => {
       res.json({ schema: builtSchema })
@@ -39,7 +46,7 @@ export const createControllerRegistrar = (
   }
 
   const registerAllBrokerControllers = () => {
-    brokerRegistrar(broker.subscription)(controllers)
+    brokerRegistrar({ prisma })(broker.subscription)(controllers)
   }
 
   return {

@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt'
-import { nanoid } from 'nanoid'
 import {
   AuthCredentials,
   AuthStrategy,
@@ -9,48 +8,58 @@ import {
   ZodRegisterCredentials,
 } from './models/Strategy.model'
 import { createController } from '@/common/createController'
-import { REFRESH_TOKEN_LENGTH } from '@/config/secrets'
-import { authenticationStore } from '@/services/authentication/stores'
-import { userStore } from '@/services/users/stores'
-import { Controller } from '@/types/controllerRelated.types'
+import { Account } from '@/domain/account'
+import { authenticationRepo } from '@/services/authentication/authentication.repo'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
-import { getClientId } from '@/utils/authentication/getClientId'
 import { issueNewToken } from '@/utils/authentication/issueNewToken'
 import { exists } from '@/utils/exists'
-import { createRandomUserName } from '@/utils/mock/createRandomUserName'
+import { justLog } from '@/utils/justLog'
 
-export const registerAuthenticateController: Controller = createController({
+export const registerAuthenticateController = createController({
   scope: 'authentication',
   transport: ['rest'],
   requireAuth: false,
-  register: addListener => {
+  repository: authenticationRepo,
+  register: (addListener, repository) => {
     addListener(
       {
         eventName: 'auth',
         description:
-          'Authentication with login/pass pair, or session prolongation with old AccessToken and its RefreshToken',
+          'Authentication with email/pass pair, or session prolongation with old AccessToken and its RefreshToken',
         validator: ZodAuthCredentials,
       },
-      (resolve, reject) => (payload: AuthCredentials) => {
+      (resolve, reject) => async (payload: AuthCredentials) => {
         if (payload.strategy === AuthStrategy.Local) {
-          if (!exists(payload.login) || !exists(payload.password))
+          if (!exists(payload.email) || !exists(payload.password))
             return reject({ reason: 'BAD_CREDENTIALS' })
 
-          const auth = authenticationStore.find(
-            authInfo => authInfo.login === payload.login,
-          )
+          // const auth = authenticationStore.find(
+          //   authInfo => authInfo.login === payload.email,
+          // )
+
+          const auth = await repository.findUser(payload.email)
           if (!exists(auth)) return reject({ reason: 'USER_NOT_FOUND' })
 
           // No ClientID check in auth, because we anyway must give new AccessToken
 
-          bcrypt.compare(payload.password, auth.password, (err, result) => {
-            if (result) {
-              return resolve(issueNewToken(auth, payload.clientId))
-            } else {
-              return reject({ reason: 'BAD_CREDENTIALS' })
-            }
-          })
+          bcrypt.compare(
+            payload.password,
+            auth.password,
+            async (err, result) => {
+              if (result) {
+                return resolve(
+                  await issueNewToken(
+                    auth as Account,
+                    repository.refreshTokenUpdater,
+                    payload.clientId,
+                  ),
+                )
+              } else {
+                return reject({ reason: 'BAD_CREDENTIALS' })
+              }
+            },
+          )
         } else if (payload.strategy === AuthStrategy.RefreshToken) {
           if (!exists(payload.refreshToken) || !exists(payload.refreshToken))
             return reject({ reason: 'EMPTY_REFRESH_TOKEN' })
@@ -64,20 +73,41 @@ export const registerAuthenticateController: Controller = createController({
               ? authenticatePayload(jwtBody)
               : undefined
 
-          if (!exists(context) || !exists(context?.user))
+          if (!exists(context) || !exists(context.userId))
             return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
 
-          const auth = authenticationStore.get(context.user.userId)
-
-          if (
-            !exists(auth) ||
-            !auth.refreshChain[getClientId(context.clientId)] ||
-            auth.refreshChain[getClientId(context.clientId)].token !==
-              payload.refreshToken
+          const auth = await repository.getAccountByIdWithCommonClientToken(
+            context.userId,
+            context.clientId,
           )
+
+          if (!exists(auth)) {
+            return reject({ reason: 'INVALID_AUTH_PAYLOAD' })
+          }
+
+          if (auth.refreshChains.length > 1) {
+            justLog.error(
+              'For user',
+              context.userId,
+              'exists 2 or more refreshChains, its unacceptable (ClientID: ',
+              context.clientId,
+              ')',
+              JSON.stringify(auth.refreshChains),
+            )
+          }
+
+          const tokenQ = auth.refreshChains?.[0]?.token || undefined
+
+          if (!exists(tokenQ) || tokenQ !== payload.refreshToken)
             return reject({ reason: 'INVALID_REFRESH_TOKEN' })
 
-          return resolve(issueNewToken(auth, context.clientId))
+          return resolve(
+            await issueNewToken(
+              auth as Account,
+              repository.refreshTokenUpdater,
+              context.clientId,
+            ),
+          )
         } else {
           return reject({
             reason: 'UNSUPPORTED_STRATEGY',
@@ -89,20 +119,25 @@ export const registerAuthenticateController: Controller = createController({
     addListener(
       {
         eventName: 'register',
-        transports: ['ws', 'rest', 'broker'],
-        description: 'Registration with login/pass pair',
+        description: 'Registration with email/pass pair',
         validator: ZodRegisterCredentials,
       },
-      (resolve, reject, context) => (payload: RegisterCredentials) => {
+      (resolve, reject, context) => async (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
-          if (!exists(payload.login) || !exists(payload.password))
+          if (!exists(payload.email) || !exists(payload.password))
             return reject({ reason: 'BAD_CREDENTIALS' })
-          const auth = authenticationStore.find(
-            authInfo => authInfo.login === payload.login,
-          )
-          if (exists(auth)) return reject({ reason: 'USER_ALREADY_EXISTS' })
 
-          bcrypt.hash(payload.password, 10, (err, hash) => {
+          const isEmailExist = await repository.checkIfEmailExists(
+            payload.email,
+          )
+
+          if (isEmailExist) {
+            return reject({
+              reason: 'EMAIL_ALREADY_REGISTERED',
+            })
+          }
+
+          bcrypt.hash(payload.password, 10, async (err, hash) => {
             if (err) {
               return reject({
                 reason: 'CANT_SOLVE_PASSWORD',
@@ -110,21 +145,19 @@ export const registerAuthenticateController: Controller = createController({
                 message: 'Please, contact maintainer',
               })
             }
-            const auth = authenticationStore.create({
-              login: payload.login,
+
+            const auth = await repository.createAccount({
+              email: payload.email,
               password: hash,
-              refreshChain: {
-                [getClientId(payload.clientId)]: {
-                  token: nanoid(REFRESH_TOKEN_LENGTH),
-                },
-              },
-            })
-            const user = userStore.insert(auth.userId, {
-              name: createRandomUserName(),
-              userId: auth.userId,
             })
 
-            return resolve(issueNewToken(auth, payload.clientId))
+            return resolve(
+              await issueNewToken(
+                auth,
+                repository.refreshTokenUpdater,
+                payload.clientId,
+              ),
+            )
           })
         } else {
           return reject({
