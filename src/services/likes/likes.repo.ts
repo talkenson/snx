@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { DateTime } from 'luxon'
+import { Account } from '@/domain/account'
 import { SparkType } from '@/domain/enums/spark-type'
 import { Spark, SparkInput } from '@/domain/spark'
-import { Account } from '@/domain/account'
 import profileCacheStore from '@/services/profile/stores/profileCache.store'
 
 export const likesRepo = ({ prisma }: { prisma: PrismaClient }) => ({

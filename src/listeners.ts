@@ -8,6 +8,7 @@ import { registerCardsController } from '@/services/cards/cards.controller'
 import { registerProfileController } from '@/services/profile/profile.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
 import { justLog } from '@/utils/justLog'
+import { registerFilesController } from '@/services/files/files.controller'
 
 justLog.info('Creating registration handles...')
 
@@ -23,6 +24,7 @@ export const {
     registerCardsController,
     registerProfileController,
     registerSparkController,
+    registerFilesController,
   ],
   {
     prisma: prisma,

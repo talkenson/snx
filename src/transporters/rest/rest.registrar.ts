@@ -81,7 +81,6 @@ export const restRegistrar =
                   })
                 }
               }
-              justLog.log(context)
               if (!authFlag || exists(context.userId)) {
                 return handler(
                   createRestResolve(res),

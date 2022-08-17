@@ -6,6 +6,6 @@ app.use(jsonParseError(app))
 
 app.get('/', (req, res) => res.json({ greeting: "Hello! It's Póke!" }))
 
-app.use('/_files', filesHandler)
+app.use('/uploads', filesHandler)
 
 export { app }

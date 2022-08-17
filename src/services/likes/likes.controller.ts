@@ -1,7 +1,7 @@
-import { createController } from '@/common/createController'
-import { Controller } from '@/types/controllerRelated.types'
 import { z } from 'zod'
+import { createController } from '@/common/createController'
 import { likesRepo } from '@/services/likes/likes.repo'
+import { Controller } from '@/types/controllerRelated.types'
 import { exists } from '@/utils/exists'
 
 export const registerSparkController: Controller<ReturnType<typeof likesRepo>> =

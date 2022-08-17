@@ -85,3 +85,19 @@ export const NATS_SERVER_USER = (() => {
 export const NATS_SERVER_PASS = (() => {
   return import.meta.env.VITE_NATS_SERVER_PASS
 })()
+
+export const AWS_ACCESS_KEY = (() => {
+  return import.meta.env.VITE_AWS_ACCESS_KEY
+})()
+
+export const AWS_SECRET_KEY = (() => {
+  return import.meta.env.VITE_AWS_SECRET_KEY
+})()
+
+export const AWS_SERVER = (() => {
+  return import.meta.env.VITE_AWS_SERVER
+})()
+
+export const AWS_BUCKET = (() => {
+  return import.meta.env.VITE_AWS_BUCKET
+})()

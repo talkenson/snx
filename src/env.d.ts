@@ -14,6 +14,10 @@ interface ImportMetaEnv {
   readonly VITE_NATS_SERVER: string
   readonly VITE_NATS_SERVER_USER: string
   readonly VITE_NATS_SERVER_PASS: string
+  readonly VITE_AWS_ACCESS_KEY: string
+  readonly VITE_AWS_SECRET_KEY: string
+  readonly VITE_AWS_SERVER: string
+  readonly VITE_AWS_BUCKET: string
 }
 
 interface ImportMeta {

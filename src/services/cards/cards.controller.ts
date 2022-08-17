@@ -1,9 +1,9 @@
 import { createController } from '@/common/createController'
 import { GetCardsPayload } from '@/domain/card'
 import { cardsRepo } from '@/services/cards/cards.repo'
-import { createRateLimiter } from '@/utils/domain/simpleRateLimiter'
 import cardsRateLimitStore from '@/services/cards/store/cardsRateLimitStore'
 import { Controller } from '@/types/controllerRelated.types'
+import { createRateLimiter } from '@/utils/domain/simpleRateLimiter'
 import { exists } from '@/utils/exists'
 
 const rateLimiter = createRateLimiter(cardsRateLimitStore)
