@@ -9,9 +9,9 @@ import {
 } from '@/config/secrets'
 import fileTokensStore from '@/services/files/stores/fileTokens.store'
 import { exists } from '@/utils/exists'
-import { S3 } from 'aws-sdk'
+import AWS from 'aws-sdk'
 
-const s3 = new S3({
+const s3 = new AWS.S3({
   endpoint: AWS_SERVER,
   accessKeyId: AWS_ACCESS_KEY,
   secretAccessKey: AWS_SECRET_KEY,
