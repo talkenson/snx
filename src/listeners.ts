@@ -5,10 +5,10 @@ import { createControllerRegistrar } from '@/common/createControllerRegistrators
 import { prisma } from '@/db'
 import { registerAuthenticateController } from '@/services/authentication/authentication.controller'
 import { registerCardsController } from '@/services/cards/cards.controller'
+import { registerFilesController } from '@/services/files/files.controller'
 import { registerProfileController } from '@/services/profile/profile.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
 import { justLog } from '@/utils/justLog'
-import { registerFilesController } from '@/services/files/files.controller'
 
 justLog.info('Creating registration handles...')
 

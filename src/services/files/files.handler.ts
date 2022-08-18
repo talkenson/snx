@@ -1,3 +1,4 @@
+import AWS from 'aws-sdk'
 import { Router } from 'express'
 import multer from 'multer'
 import sharp from 'sharp'
@@ -9,7 +10,6 @@ import {
 } from '@/config/secrets'
 import fileTokensStore from '@/services/files/stores/fileTokens.store'
 import { exists } from '@/utils/exists'
-import AWS from 'aws-sdk'
 
 const s3 = new AWS.S3({
   endpoint: AWS_SERVER,
