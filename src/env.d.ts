@@ -18,6 +18,7 @@ interface ImportMetaEnv {
   readonly VITE_AWS_SECRET_KEY: string
   readonly VITE_AWS_SERVER: string
   readonly VITE_AWS_BUCKET: string
+  readonly VITE_AWS_SSL_ENABLED: string
   readonly VITE_MAIL_SMTP_SERVER: string
   readonly VITE_MAIL_LOGIN: string
   readonly VITE_MAIL_PASSWORD: string
