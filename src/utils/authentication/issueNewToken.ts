@@ -39,6 +39,7 @@ export const issueNewToken = async (
   return {
     userId: auth.id,
     email: auth.email,
+    expiresIn: JWT_LIFETIME_SEC,
     token: jwt.sign(
       {
         userId: auth.id,
