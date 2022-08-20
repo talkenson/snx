@@ -18,6 +18,7 @@ import {
 import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 import { justLog } from '@/utils/justLog'
+import { z } from 'zod'
 
 export const restRegistrar =
   ({ prisma }: RegistrarInjection): RestControllerRegistrar =>
