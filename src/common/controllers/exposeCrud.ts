@@ -7,7 +7,7 @@ export const exposeCrud =
   (
     store: Crud<any, any>,
     exposedMethods?: CrudMethodName[],
-  ): ControllerRegisterer =>
+  ): ControllerRegisterer<undefined> =>
   (addListener: AddListenerFunction) => {
     ;(Object.entries(store) as [CrudMethodName, CrudMethod][])
       .filter(([name]) => !name.includes('find'))

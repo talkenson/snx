@@ -1,10 +1,8 @@
-import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
 import { Account } from '@/domain/account'
 import { Profile } from '@/domain/profile'
 import profileCacheStore from '@/services/profile/stores/profileCache.store'
 import { exists } from '@/utils/exists'
-import mockPersons from '@/utils/mock/persons.json'
 
 export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async checkIfProfileExists(accountId: Account['id']) {

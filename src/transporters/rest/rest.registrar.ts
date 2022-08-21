@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { z } from 'zod'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
@@ -18,7 +19,6 @@ import {
 import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 import { justLog } from '@/utils/justLog'
-import { z } from 'zod'
 
 export const restRegistrar =
   ({ prisma }: RegistrarInjection): RestControllerRegistrar =>

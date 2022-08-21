@@ -1,8 +1,8 @@
-import { createController } from '@/common/createController'
-import { Controller } from '@/types/controllerRelated.types'
 import { z } from 'zod'
-import ruEnums from '@/domain/enums/translations/ru'
+import { createController } from '@/common/createController'
 import enEnums from '@/domain/enums/translations/en'
+import ruEnums from '@/domain/enums/translations/ru'
+import { Controller } from '@/types/controllerRelated.types'
 
 export const registerSchemaController: Controller = createController({
   scope: 'schema',
