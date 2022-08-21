@@ -66,12 +66,11 @@ export const registerAuthenticateController = createController({
           if (!exists(payload.oldAccessToken))
             return reject({ reason: 'EMPTY_OLD_ACCESS_TOKEN' })
 
-          const jwtBody = extractJwtInfo(payload.oldAccessToken)
+          const jwtBody = await extractJwtInfo(payload.oldAccessToken)
 
-          const context =
-            jwtBody && typeof jwtBody !== 'string'
-              ? authenticatePayload(jwtBody)
-              : undefined
+          const context = exists(jwtBody)
+            ? authenticatePayload(jwtBody)
+            : undefined
 
           if (!exists(context) || !exists(context.userId))
             return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
