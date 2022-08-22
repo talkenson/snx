@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io'
-import { User } from '@/services/profile/models/User.model'
+import { Account } from '@/domain/account'
 
 export type SocketMap = {
   socketId: Socket['id']
-  userId: User['userId']
+  userId: Account['id']
 }
 
 export const primaryKey = 'userId'

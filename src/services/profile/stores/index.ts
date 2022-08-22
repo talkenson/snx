@@ -1,1 +1,1 @@
-export { profileCacheStore } from './user.store'
+export { profileCacheStore } from './profileCache.store'

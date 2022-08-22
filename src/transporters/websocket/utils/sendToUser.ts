@@ -1,9 +1,9 @@
-import { User } from '@/services/profile/models/User.model'
 import socketMapStore from '@/transporters/websocket/stores/socketMap.store'
 import { withIO } from '@/transporters/websocket/utils/withIO'
+import { Account } from '@/domain/account'
 
 export const sendToUser = (
-  userId: User['userId'],
+  userId: Account['id'],
   event: string,
   ...args: any[]
 ) =>
