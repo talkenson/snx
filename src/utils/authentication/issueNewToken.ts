@@ -43,8 +43,9 @@ export const issueNewToken = async (
     token: jwt.sign(
       {
         userId: auth.id,
-        profileId:
-          auth.profile?.id || profileCacheStore.get(auth.id)?.profileId || -1,
+        profileId: exists(auth.profile)
+          ? auth.profile.id
+          : profileCacheStore.get(auth.id)?.profileId ?? -1,
         clientId: safeClientId,
       },
       JWT_KEY,
