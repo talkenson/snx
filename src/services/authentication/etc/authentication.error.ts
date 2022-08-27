@@ -1,6 +1,5 @@
 export enum AuthenticationError {
   BadCredentials = 'BAD_CREDENTIALS',
-  UserNotFound = 'USER_NOT_FOUND',
   MissingRefreshToken = 'MISSING_REFRESH_TOKEN',
   MissingOldAccessToken = 'MISSING_OLD_ACCESS_TOKEN',
   InvalidOldAccessToken = 'INVALID_OLD_ACCESS_TOKEN',

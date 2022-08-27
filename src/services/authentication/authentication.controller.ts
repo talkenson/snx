@@ -35,13 +35,9 @@ export const registerAuthenticateController = createController({
           if (!exists(payload.email) || !exists(payload.password))
             return reject({ reason: AuthenticationError.BadCredentials })
 
-          // const auth = authenticationStore.find(
-          //   authInfo => authInfo.login === payload.email,
-          // )
-
           const auth = await repository.findUser(payload.email)
           if (!exists(auth))
-            return reject({ reason: AuthenticationError.UserNotFound })
+            return reject({ reason: AuthenticationError.BadCredentials })
 
           // No ClientID check in auth, because we anyway must give new AccessToken
 
