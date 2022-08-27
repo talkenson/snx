@@ -102,6 +102,26 @@ export const registerProfileController: Controller<
       },
     )
 
+    addListener(
+      {
+        eventName: 'getOverallStats',
+        description: 'Get overall stats',
+        requireAuth: true,
+        restMethods: ['GET', 'POST'],
+      },
+      (resolve, reject, context) => async () => {
+        const profile = await repository.getProfileWithAllExtras(
+          context.userId!,
+        )
+
+        if (exists(profile)) {
+          return resolve(profile)
+        } else {
+          return reject({ reason: ProfileError.ProfileNotExists })
+        }
+      },
+    )
+
     /*addListener(
       {
         eventName: 'mock',

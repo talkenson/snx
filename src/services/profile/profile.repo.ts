@@ -93,6 +93,43 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
     }
     return profile
   },
+  async getProfileWithAllExtras(accountId: Account['id']) {
+    const profile = await prisma.profile.findUnique({
+      where: {
+        accountId: accountId,
+      },
+      include: {
+        work: true,
+        contacts: true,
+        graduate: true,
+        notifications: {
+          where: {
+            isRead: false,
+          },
+          select: {
+            profile: {
+              select: {
+                name: true,
+                age: true,
+                avatar: true,
+              },
+            },
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    })
+    if (exists(profile)) {
+      profileCacheStore.insert(profile.accountId, {
+        accountId: profile.accountId,
+        profileId: profile.id,
+      })
+    }
+    return profile
+  },
   async mock() {
     /*const createdAccounts = await prisma.account.createMany({
       data: Array.from({ length: 100 }, () => ({
