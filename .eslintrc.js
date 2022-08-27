@@ -14,6 +14,7 @@ module.exports = {
   rules: {
     'poke-eslint/poke-return-on-resolve-reject': 1,
     '@typescript-eslint/ban-ts-comment': 1,
+    '@typescript-eslint/no-non-null-assertion': 1,
     eqeqeq: ['error', 'always'],
     'import/order': [
       'error',

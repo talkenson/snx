@@ -68,7 +68,11 @@ export const registerSparkController: Controller<ReturnType<typeof sparkRepo>> =
 
             if (sparkType === SparkType.Like) {
               // No need to await
-              repository.createSparkNotification(context.profileId, spark.id)
+              repository.createSparkNotification(
+                context.profileId,
+                spark.id,
+                recipientId,
+              )
             }
 
             return resolve({ spark })

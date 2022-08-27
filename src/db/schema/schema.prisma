@@ -279,6 +279,9 @@ model Profile {
   searchAgeBoundaries Int[]
   sex                 Sex
 
+  avatar String?
+  photos String[]
+
   height        Int?
   weight        Int?
   lookingFor    LookingFor?
@@ -298,7 +301,8 @@ model Profile {
   initiatedSparks Spark[] @relation(name: "sparkInitiatorRelation")
   recipientSparks Spark[] @relation(name: "sparkRecipientRelation")
 
-  notifications SparkNotification[] @relation(name: "sparkTargetProfileRelation")
+  notifications     SparkNotification[] @relation(name: "sparkRecipientProfileRelation")
+  sentNotifications SparkNotification[] @relation(name: "sparkInitiatorProfileRelation")
 }
 
 model Spark {
@@ -321,10 +325,12 @@ model Spark {
 model SparkNotification {
   id Int @id @default(autoincrement())
 
-  sparkId   Int
-  spark     Spark    @relation(name: "sparkNotificationRelation", fields: [sparkId], references: [id])
-  profileId Int
-  profile   Profile  @relation(name: "sparkTargetProfileRelation", fields: [profileId], references: [id])
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  sparkId     Int
+  spark       Spark    @relation(name: "sparkNotificationRelation", fields: [sparkId], references: [id])
+  profileId   Int
+  profile     Profile  @relation(name: "sparkInitiatorProfileRelation", fields: [profileId], references: [id])
+  recipientId Int
+  recipient   Profile  @relation(name: "sparkRecipientProfileRelation", fields: [recipientId], references: [id])
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

@@ -25,6 +25,9 @@ export const ProfileInput = z.object({
     .length(2, 'Incorrect age boundaries')
     .optional(),
 
+  avatar: z.string().nullish(),
+  photos: z.array(z.string()).max(8).default([]),
+
   sex: z.nativeEnum(Sex),
   height: z
     .number()

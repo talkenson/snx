@@ -52,11 +52,13 @@ export const sparkRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async createSparkNotification(
     initiatorId: Spark['initiatorId'],
     sparkId: Spark['id'],
+    recipientId: Spark['recipientId'],
   ) {
     return await prisma.sparkNotification.create({
       data: {
         profileId: initiatorId,
         sparkId: sparkId,
+        recipientId: recipientId,
       },
     })
   },
