@@ -36,14 +36,8 @@ export const registerCardsController: Controller<ReturnType<typeof cardsRepo>> =
             if (!exists(profileId)) {
               return reject({ reason: CardsError.NeedToCreateProfile })
             }
-            if (context.profileId === -1 || !exists(context.profileId)) {
-              context.profileId = profileId
-            }
             const count = passedCount || 10
-            const profiles = await repository.getProfiles(
-              context.profileId,
-              count,
-            )
+            const profiles = await repository.getProfiles(profileId, count)
             rateLimiter.createRateLimit(context.userId!)
 
             return resolve({ profiles, count: profiles.length })

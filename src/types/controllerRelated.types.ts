@@ -11,7 +11,6 @@ export type ControllerContext<
   T extends Record<string, unknown> = Record<string, unknown>,
 > = {
   userId?: Account['id']
-  profileId?: Profile['id']
   event: string
   authRequired?: boolean
   transport: PokeTransport

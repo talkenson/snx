@@ -38,19 +38,16 @@ export const registerSparkController: Controller<ReturnType<typeof sparkRepo>> =
             if (!exists(profileId)) {
               return reject({ reason: SparkError.NeedToCreateProfile })
             }
-            if (context.profileId === -1 || !exists(context.profileId)) {
-              context.profileId = profileId
-            }
 
             const mutualSpark = await repository.checkIfMutualSparkExists({
               initiatorId: recipientId,
-              recipientId: context.profileId,
+              recipientId: profileId,
             })
 
             const mutualSparkExists = exists(mutualSpark)
 
             const spark = await repository.createSpark({
-              initiatorId: context.profileId,
+              initiatorId: profileId,
               recipientId: recipientId,
               sparkType: sparkType,
               isSubmitted: mutualSparkExists || sparkType === SparkType.Dislike,
@@ -69,7 +66,7 @@ export const registerSparkController: Controller<ReturnType<typeof sparkRepo>> =
             if (sparkType === SparkType.Like) {
               // No need to await
               repository.createSparkNotification(
-                context.profileId,
+                profileId,
                 spark.id,
                 recipientId,
               )

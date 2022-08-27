@@ -7,13 +7,12 @@ import {
   REFRESH_TOKEN_LENGTH,
 } from '@/config/secrets'
 import { Account } from '@/domain/account'
-import profileCacheStore from '@/services/profile/stores/profileCache.store'
 import { getClientId } from '@/utils/authentication/getClientId'
 import { getToken } from '@/utils/authentication/repo'
 import { exists } from '@/utils/exists'
 
 export const issueNewToken = async (
-  auth: Pick<Account, 'email' | 'id' | 'profile'>,
+  auth: Pick<Account, 'email' | 'id' | 'profile' | 'origin' | 'externalId'>,
   refreshTokenUpdater: (
     accountId: Account['id'],
     clientId: string,
@@ -39,13 +38,12 @@ export const issueNewToken = async (
   return {
     userId: auth.id,
     email: auth.email,
+    origin: auth.origin,
+    externalId: auth.externalId,
     expiresIn: JWT_LIFETIME_SEC,
     token: jwt.sign(
       {
         userId: auth.id,
-        profileId: exists(auth.profile)
-          ? auth.profile.id
-          : profileCacheStore.get(auth.id)?.profileId ?? -1,
         clientId: safeClientId,
       },
       JWT_KEY,

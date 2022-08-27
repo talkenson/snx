@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { DateTime } from 'luxon'
 import { Account } from '@/domain/account'
 import { SparkType } from '@/domain/enums/spark-type'
-import { Spark, SparkInput } from '@/domain/spark'
-import profileCacheStore from '@/services/profile/stores/profileCache.store'
 
 export const likesRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async getLikes({
@@ -32,17 +29,14 @@ export const likesRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   },
   async getProfileId(accountId: Account['id']) {
     return (
-      profileCacheStore.get(accountId)?.profileId ||
-      (
-        await prisma.profile.findUnique({
-          where: {
-            accountId,
-          },
-          select: {
-            id: true,
-          },
-        })
-      )?.id
-    )
+      await prisma.profile.findUnique({
+        where: {
+          accountId,
+        },
+        select: {
+          id: true,
+        },
+      })
+    )?.id
   },
 })

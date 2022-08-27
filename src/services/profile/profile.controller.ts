@@ -1,5 +1,5 @@
 import { createController } from '@/common/createController'
-import { Profile, ProfileInput, ProfilePatchInput } from '@/domain/profile'
+import { ProfileInput, ProfilePatchInput } from '@/domain/profile'
 import { ProfileError } from '@/services/profile/etc/profile.error'
 import { profileRepo } from '@/services/profile/profile.repo'
 import { Controller } from '@/types/controllerRelated.types'
@@ -89,10 +89,10 @@ export const registerProfileController: Controller<
         restMethods: ['GET', 'POST'],
       },
       (resolve, reject, context) => async () => {
-        if (!exists(context.profileId)) {
+        const profile = await repository.getProfile(context.userId!)
+        if (!exists(profile)) {
           return reject({ reason: ProfileError.NeedToCreateProfile })
         }
-        const profile = await repository.getProfile(context.profileId)
 
         if (exists(profile)) {
           return resolve(profile)

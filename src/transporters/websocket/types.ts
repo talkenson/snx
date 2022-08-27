@@ -22,8 +22,6 @@ export type EventListenerMap = Map<
 export type ForeignContext = {
   userId?: number
   clientId: string
-  profileId?: number
-  profile?: Profile
 }
 
 export type EventControllerRegistrar = (

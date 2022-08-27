@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { Account } from '@/domain/account'
 import { Profile } from '@/domain/profile'
-import profileCacheStore from '@/services/profile/stores/profileCache.store'
-import { exists } from '@/utils/exists'
 
 export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async checkIfProfileExists(accountId: Account['id']) {
@@ -16,7 +14,7 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
     accountId: Account['id'],
     data: Omit<Profile, 'id' | 'accountId'>,
   ) {
-    const createdProfile = await prisma.profile.create({
+    return await prisma.profile.create({
       data: {
         ...data,
         accountId: accountId,
@@ -27,17 +25,12 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
         graduate: true,
       },
     })
-    profileCacheStore.insert(createdProfile.accountId, {
-      accountId: createdProfile.accountId,
-      profileId: createdProfile.id,
-    })
-    return createdProfile
   },
   async patchProfile(
     accountId: Account['id'],
     data: Partial<Omit<Profile, 'id' | 'accountId'>>,
   ) {
-    const updatedProfile = await prisma.profile.update({
+    return await prisma.profile.update({
       data: {
         ...data,
         work: data.work
@@ -72,12 +65,11 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
         graduate: true,
       },
     })
-    return updatedProfile
   },
-  async getProfile(profileId: Profile['id']) {
-    const profile = await prisma.profile.findUnique({
+  async getProfile(accountId: Account['id']) {
+    return await prisma.profile.findUnique({
       where: {
-        id: profileId,
+        accountId: accountId,
       },
       include: {
         work: true,
@@ -85,16 +77,9 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
         graduate: true,
       },
     })
-    if (exists(profile)) {
-      profileCacheStore.insert(profile.accountId, {
-        accountId: profile.accountId,
-        profileId: profile.id,
-      })
-    }
-    return profile
   },
   async getProfileWithAllExtras(accountId: Account['id']) {
-    const profile = await prisma.profile.findUnique({
+    return await prisma.profile.findUnique({
       where: {
         accountId: accountId,
       },
@@ -122,13 +107,6 @@ export const profileRepo = ({ prisma }: { prisma: PrismaClient }) => ({
         },
       },
     })
-    if (exists(profile)) {
-      profileCacheStore.insert(profile.accountId, {
-        accountId: profile.accountId,
-        profileId: profile.id,
-      })
-    }
-    return profile
   },
   async mock() {
     /*const createdAccounts = await prisma.account.createMany({
