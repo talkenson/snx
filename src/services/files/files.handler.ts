@@ -9,6 +9,7 @@ import {
   AWS_SERVER,
   AWS_SSL_ENABLED,
 } from '@/config/secrets'
+import { FilesError } from '@/services/files/etc/files.error'
 import fileTokensStore from '@/services/files/stores/fileTokens.store'
 import { exists } from '@/utils/exists'
 
@@ -32,12 +33,12 @@ export const filesHandler = Router().post(
       res.json({ status: 'rejected', result: result })
 
     if (typeof req.body !== 'object') {
-      return reject({ reason: 'UNSUPPORTED_PAYLOAD' })
+      return reject({ reason: FilesError.UnsupportedPayload })
     }
 
     if (!req.params.token || req.params.token.length < 4) {
       return reject({
-        reason: 'INVALID_PAYLOAD',
+        reason: FilesError.InvalidPayload,
         description: 'token parameter must be provided',
       })
     }
@@ -45,32 +46,38 @@ export const filesHandler = Router().post(
     const fileUploadRequest = fileTokensStore.get(req.params.token)
 
     if (!exists(fileUploadRequest)) {
-      return reject({ reason: 'INVALID_UPLOAD_TOKEN' })
+      return reject({ reason: FilesError.InvalidUploadToken })
     }
 
     const { file } = req as typeof req & { file: { buffer: Buffer } }
 
     if (!file?.buffer) {
-      return reject({ reason: 'MEDIA_NOT_PRESENTED' })
+      return reject({ reason: FilesError.MediaNotPresented })
     }
+    try {
+      const buffer = await sharp(file.buffer)
+        .jpeg({
+          quality: 90,
+        })
+        .toBuffer()
 
-    const buffer = await sharp(file.buffer)
-      .jpeg({
-        quality: 90,
+      const uploaded = await s3
+        .upload({
+          Bucket: AWS_BUCKET,
+          Key: fileUploadRequest.filenames[0],
+          Body: buffer,
+        })
+        .promise()
+
+      return resolve({
+        location: `${uploaded.Bucket}/${uploaded.Key}`,
+        key: uploaded.Key,
       })
-      .toBuffer()
-
-    const uploaded = await s3
-      .upload({
-        Bucket: AWS_BUCKET,
-        Key: fileUploadRequest.filenames[0],
-        Body: buffer,
+    } catch (e) {
+      return reject({
+        reason: FilesError.ImageUploadError,
+        description: JSON.stringify(e),
       })
-      .promise()
-
-    return resolve({
-      location: `${uploaded.Bucket}/${uploaded.Key}`,
-      key: uploaded.Key,
-    })
+    }
   },
 )

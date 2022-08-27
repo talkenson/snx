@@ -10,6 +10,7 @@ import {
 import { createController } from '@/common/createController'
 import { Account } from '@/domain/account'
 import { authenticationRepo } from '@/services/authentication/authentication.repo'
+import { AuthenticationError } from '@/services/authentication/etc/authentication.error'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
 import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
 import { issueNewToken } from '@/utils/authentication/issueNewToken'
@@ -32,14 +33,15 @@ export const registerAuthenticateController = createController({
       (resolve, reject) => async (payload: AuthCredentials) => {
         if (payload.strategy === AuthStrategy.Local) {
           if (!exists(payload.email) || !exists(payload.password))
-            return reject({ reason: 'BAD_CREDENTIALS' })
+            return reject({ reason: AuthenticationError.BadCredentials })
 
           // const auth = authenticationStore.find(
           //   authInfo => authInfo.login === payload.email,
           // )
 
           const auth = await repository.findUser(payload.email)
-          if (!exists(auth)) return reject({ reason: 'USER_NOT_FOUND' })
+          if (!exists(auth))
+            return reject({ reason: AuthenticationError.UserNotFound })
 
           // No ClientID check in auth, because we anyway must give new AccessToken
 
@@ -56,15 +58,15 @@ export const registerAuthenticateController = createController({
                   ),
                 )
               } else {
-                return reject({ reason: 'BAD_CREDENTIALS' })
+                return reject({ reason: AuthenticationError.BadCredentials })
               }
             },
           )
         } else if (payload.strategy === AuthStrategy.RefreshToken) {
           if (!exists(payload.refreshToken) || !exists(payload.refreshToken))
-            return reject({ reason: 'EMPTY_REFRESH_TOKEN' })
+            return reject({ reason: AuthenticationError.MissingRefreshToken })
           if (!exists(payload.oldAccessToken))
-            return reject({ reason: 'EMPTY_OLD_ACCESS_TOKEN' })
+            return reject({ reason: AuthenticationError.MissingOldAccessToken })
 
           const jwtBody = await extractJwtInfo(payload.oldAccessToken)
 
@@ -73,7 +75,7 @@ export const registerAuthenticateController = createController({
             : undefined
 
           if (!exists(context) || !exists(context.userId))
-            return reject({ reason: 'INVALID_OLD_ACCESS_TOKEN' })
+            return reject({ reason: AuthenticationError.InvalidOldAccessToken })
 
           const auth = await repository.getAccountByIdWithCommonClientToken(
             context.userId,
@@ -81,7 +83,7 @@ export const registerAuthenticateController = createController({
           )
 
           if (!exists(auth)) {
-            return reject({ reason: 'INVALID_AUTH_PAYLOAD' })
+            return reject({ reason: AuthenticationError.InvalidAuthPayload })
           }
 
           if (auth.refreshChains.length > 1) {
@@ -98,7 +100,7 @@ export const registerAuthenticateController = createController({
           const tokenQ = auth.refreshChains?.[0]?.token || undefined
 
           if (!exists(tokenQ) || tokenQ !== payload.refreshToken)
-            return reject({ reason: 'INVALID_REFRESH_TOKEN' })
+            return reject({ reason: AuthenticationError.InvalidRefreshToken })
 
           return resolve(
             await issueNewToken(
@@ -109,7 +111,7 @@ export const registerAuthenticateController = createController({
           )
         } else {
           return reject({
-            reason: 'UNSUPPORTED_STRATEGY',
+            reason: AuthenticationError.UnsupportedStrategy,
           })
         }
       },
@@ -124,7 +126,7 @@ export const registerAuthenticateController = createController({
       (resolve, reject, context) => async (payload: RegisterCredentials) => {
         if (payload.strategy === RegisterStrategy.Local) {
           if (!exists(payload.email) || !exists(payload.password))
-            return reject({ reason: 'BAD_CREDENTIALS' })
+            return reject({ reason: AuthenticationError.BadCredentials })
 
           const isEmailExist = await repository.checkIfEmailExists(
             payload.email,
@@ -132,14 +134,14 @@ export const registerAuthenticateController = createController({
 
           if (isEmailExist) {
             return reject({
-              reason: 'EMAIL_ALREADY_REGISTERED',
+              reason: AuthenticationError.AccountAlreadyExists,
             })
           }
 
           bcrypt.hash(payload.password, 10, async (err, hash) => {
             if (err) {
               return reject({
-                reason: 'CANT_SOLVE_PASSWORD',
+                reason: AuthenticationError.CantSolvePassword,
                 err: JSON.stringify(err),
                 message: 'Please, contact maintainer',
               })
@@ -160,7 +162,7 @@ export const registerAuthenticateController = createController({
           })
         } else {
           return reject({
-            reason: 'UNSUPPORTED_STRATEGY',
+            reason: AuthenticationError.UnsupportedStrategy,
           })
         }
       },

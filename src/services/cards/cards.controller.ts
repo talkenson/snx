@@ -1,7 +1,8 @@
 import { createController } from '@/common/createController'
 import { GetCardsPayload } from '@/domain/card'
 import { cardsRepo } from '@/services/cards/cards.repo'
-import cardsRateLimitStore from '@/services/cards/store/cardsRateLimitStore'
+import { CardsError } from '@/services/cards/etc/cards.error'
+import cardsRateLimitStore from '@/services/cards/stores/cardsRateLimitStore'
 import { Controller } from '@/types/controllerRelated.types'
 import { createRateLimiter } from '@/utils/domain/simpleRateLimiter'
 import { exists } from '@/utils/exists'
@@ -27,13 +28,13 @@ export const registerCardsController: Controller<ReturnType<typeof cardsRepo>> =
           async ({ count: passedCount }) => {
             if (rateLimiter.isRateLimited(context.userId!)) {
               return reject({
-                reason: 'RATE_LIMIT',
+                reason: CardsError.RateLimit,
                 description: 'Requests are too often',
               })
             }
             const profileId = await repository.getProfileId(context.userId!)
             if (!exists(profileId)) {
-              return reject({ reason: 'YOU_HAVE_NO_PROFILE_NEED_TO_CREATE' })
+              return reject({ reason: CardsError.NeedToCreateProfile })
             }
             if (context.profileId === -1 || !exists(context.profileId)) {
               context.profileId = profileId

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
+import { CommonError } from '@/common/enums/common.error'
 import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
 import {
   RestControllerRegistrar,
@@ -18,7 +19,6 @@ import {
 } from '@/types/listenerRelated.types'
 import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
-import { justLog } from '@/utils/justLog'
 
 export const restRegistrar =
   ({ prisma }: RegistrarInjection): RestControllerRegistrar =>
@@ -71,7 +71,7 @@ export const restRegistrar =
                 const validation = metadata.validator.safeParse(payload)
                 if (validation && !validation.success) {
                   return createRestReject(res)({
-                    reason: 'INVALID_PAYLOAD',
+                    reason: CommonError.InvalidPayload,
                     description: validation.error.errors.map(
                       ({ path, code, message }) => ({
                         path,
@@ -101,7 +101,7 @@ export const restRegistrar =
             },
             listener: context => res =>
               res.json({
-                status: 'Unreachable',
+                status: 'unreachable',
                 solution: 'TRY_OTHER_TRANSPORT',
                 handler: fullEventRouteName,
               }),
@@ -154,9 +154,10 @@ export const restRegistrar =
             event: eventName,
           })(res, { ...req.query, ...req.body })
         } else {
-          return res
-            .status(404)
-            .json({ reason: 'NOT_FOUND', supported: options?.restMethods })
+          return res.status(405).json({
+            reason: CommonError.NotAllowed,
+            supported: options?.restMethods,
+          })
         }
       })
     })

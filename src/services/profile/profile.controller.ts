@@ -1,5 +1,6 @@
 import { createController } from '@/common/createController'
 import { Profile, ProfileInput, ProfilePatchInput } from '@/domain/profile'
+import { ProfileError } from '@/services/profile/etc/profile.error'
 import { profileRepo } from '@/services/profile/profile.repo'
 import { Controller } from '@/types/controllerRelated.types'
 import { exists } from '@/utils/exists'
@@ -25,7 +26,8 @@ export const registerProfileController: Controller<
         const profileExists = await repository.checkIfProfileExists(
           context.userId!,
         )
-        if (profileExists) return reject({ reason: 'PROFILE_ALREADY_EXISTS' })
+        if (profileExists)
+          return reject({ reason: ProfileError.ProfileAlreadyExists })
         try {
           const createdProfile = await repository.createProfile(
             context.userId!,
@@ -35,11 +37,14 @@ export const registerProfileController: Controller<
           if (exists(createdProfile)) {
             return resolve(createdProfile)
           } else {
-            return reject({ reason: 'UNABLE_TO_CREATE_PROFILE' })
+            return reject({ reason: ProfileError.UnableToCreateProfile })
           }
         } catch (e) {
           justLog.error(e)
-          return reject({ reason: 'PROFILE_CREATION_ERROR', error: e })
+          return reject({
+            reason: ProfileError.UnableToCreateProfile,
+            error: e,
+          })
         }
       },
     )
@@ -56,7 +61,8 @@ export const registerProfileController: Controller<
         const profileExists = await repository.checkIfProfileExists(
           context.userId!,
         )
-        if (!profileExists) return reject({ reason: 'NO_PROFILE_FOUND' })
+        if (!profileExists)
+          return reject({ reason: ProfileError.NeedToCreateProfile })
         try {
           const patchedProfile = await repository.patchProfile(
             context.userId!,
@@ -66,11 +72,11 @@ export const registerProfileController: Controller<
           if (exists(patchedProfile)) {
             return resolve(patchedProfile)
           } else {
-            return reject({ reason: 'UNABLE_TO_PATCH_PROFILE' })
+            return reject({ reason: ProfileError.UnableToPatchProfile })
           }
         } catch (e) {
           justLog.error(e)
-          return reject({ reason: 'PROFILE_PATCHING_ERROR', error: e })
+          return reject({ reason: ProfileError.UnableToPatchProfile, error: e })
         }
       },
     )
@@ -84,14 +90,14 @@ export const registerProfileController: Controller<
       },
       (resolve, reject, context) => async () => {
         if (!exists(context.profileId)) {
-          return reject({ reason: 'PROFILE_NOT_CREATED' })
+          return reject({ reason: ProfileError.NeedToCreateProfile })
         }
         const profile = await repository.getProfile(context.profileId)
 
         if (exists(profile)) {
           return resolve(profile)
         } else {
-          return reject({ reason: 'NO_PROFILE_FOUND' })
+          return reject({ reason: ProfileError.ProfileNotExists })
         }
       },
     )

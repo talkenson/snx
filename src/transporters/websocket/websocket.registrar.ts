@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
+import { CommonError } from '@/common/enums/common.error'
 import {
   EventControllerRegistrar,
   EventListenerMap,
@@ -59,7 +60,7 @@ export const websocketRegistrar =
                       fullEventRouteName,
                       hash,
                     )({
-                      reason: 'INVALID_PAYLOAD',
+                      reason: CommonError.InvalidPayload,
                       description: validation.error.errors.map(
                         ({ path, code, message }) => ({
                           path,
@@ -90,7 +91,7 @@ export const websocketRegistrar =
                 fullEventRouteName,
                 hash,
               )({
-                status: 'Unreachable',
+                status: 'unreachable',
                 solution: 'TRY_OTHER_TRANSPORT',
                 handler: fullEventRouteName,
               })

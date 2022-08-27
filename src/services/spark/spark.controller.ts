@@ -2,7 +2,8 @@ import { DateTime } from 'luxon'
 import { createController } from '@/common/createController'
 import { SparkType } from '@/domain/enums/spark-type'
 import { SparkCreateInputPayload } from '@/domain/spark'
-import cardsRateLimitStore from '@/services/cards/store/cardsRateLimitStore'
+import cardsRateLimitStore from '@/services/cards/stores/cardsRateLimitStore'
+import { SparkError } from '@/services/spark/etc/spark.error'
 import { sparkRepo } from '@/services/spark/spark.repo'
 import { Controller } from '@/types/controllerRelated.types'
 import { createRateLimiter } from '@/utils/domain/simpleRateLimiter'
@@ -29,13 +30,13 @@ export const registerSparkController: Controller<ReturnType<typeof sparkRepo>> =
           async ({ recipientId, sparkType }) => {
             if (rateLimiter.isRateLimited(context.userId!)) {
               return reject({
-                reason: 'RATE_LIMIT',
+                reason: SparkError.RateLimit,
                 description: 'Requests are too often',
               })
             }
             const profileId = await repository.getProfileId(context.userId!)
             if (!exists(profileId)) {
-              return reject({ reason: 'YOU_HAVE_NO_PROFILE_NEED_TO_CREATE' })
+              return reject({ reason: SparkError.NeedToCreateProfile })
             }
             if (context.profileId === -1 || !exists(context.profileId)) {
               context.profileId = profileId
