@@ -8,4 +8,6 @@ export enum AuthenticationError {
   UnsupportedStrategy = 'UNSUPPORTED_STRATEGY',
   AccountAlreadyExists = 'ACCOUNT_ALREADY_EXISTS',
   CantSolvePassword = 'CANT_SOLVE_PASSWORD',
+  VKCodeNotPresented = 'VK_CODE_NOT_PRESENTED',
+  VKAuthFailed = 'VK_AUTH_FAILED',
 }

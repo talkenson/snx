@@ -10,12 +10,19 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]),
 )
 
+export enum AccountOrigin {
+  Local = 'Local',
+  VK = 'VK',
+}
+
 export const Account = z.object({
   id: z.number().int(),
-  email: z.string().email(),
+  email: z.string().email().nullish(),
   password: RawPassword,
   refreshChains: z.array(RefreshTokenRecord),
   profile: Profile.optional().nullish(),
+  origin: z.nativeEnum(AccountOrigin).default(AccountOrigin.Local),
+  externalId: z.number().int().nullish(),
 })
 
 export type Account = z.infer<typeof Account>

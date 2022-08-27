@@ -8,7 +8,7 @@ import {
   ZodRegisterCredentials,
 } from './models/Strategy.model'
 import { createController } from '@/common/createController'
-import { Account } from '@/domain/account'
+import { Account, AccountOrigin } from '@/domain/account'
 import { authenticationRepo } from '@/services/authentication/authentication.repo'
 import { AuthenticationError } from '@/services/authentication/etc/authentication.error'
 import { authenticatePayload } from '@/utils/authentication/authenticatePayload'
@@ -16,6 +16,7 @@ import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
 import { issueNewToken } from '@/utils/authentication/issueNewToken'
 import { exists } from '@/utils/exists'
 import { justLog } from '@/utils/justLog'
+import { getAccessTokenFromCode } from '@/utils/oauth/vk/getAccessTokenFromCode'
 
 export const registerAuthenticateController = createController({
   scope: 'authentication',
@@ -105,6 +106,45 @@ export const registerAuthenticateController = createController({
               context.clientId,
             ),
           )
+        } else if (payload.strategy === AuthStrategy.VK) {
+          if (!exists(payload.code))
+            return reject({ reason: AuthenticationError.VKCodeNotPresented })
+
+          const response = await getAccessTokenFromCode(payload.code)
+
+          if (!response.status) {
+            return reject({
+              reason: AuthenticationError.VKAuthFailed,
+              details: response.data,
+            })
+          }
+
+          const { user_id: userId } = response.data
+
+          const auth = await repository.findUserByOrigin(
+            AccountOrigin.VK,
+            userId,
+          )
+          let account: Account | null = auth as Account | null
+          if (!exists(auth)) {
+            // create user if this is first time
+            account = (await repository.createAccount({
+              origin: AccountOrigin.VK,
+              externalId: userId,
+            })) as Account
+          }
+
+          if (exists(account)) {
+            return resolve(
+              await issueNewToken(
+                account as Account,
+                repository.refreshTokenUpdater,
+                payload.clientId,
+              ),
+            )
+          } else {
+            return reject({ reason: AuthenticationError.VKAuthFailed })
+          }
         } else {
           return reject({
             reason: AuthenticationError.UnsupportedStrategy,
@@ -146,6 +186,7 @@ export const registerAuthenticateController = createController({
             const auth = await repository.createAccount({
               email: payload.email,
               password: hash,
+              origin: AccountOrigin.Local,
             })
 
             return resolve(

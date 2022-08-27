@@ -20,10 +20,20 @@ model RefreshTokenRecord {
 
 model Account {
   id            Int                  @id @default(autoincrement())
-  email         String               @unique
+  email         String?
   password      String
   profile       Profile?             @relation()
   refreshChains RefreshTokenRecord[] @relation()
+  origin        AccountOrigin        @default(Local)
+  externalId    Int?
+
+  @@unique([origin, externalId])
+  @@unique([origin, email])
+}
+
+enum AccountOrigin {
+  Local
+  VK
 }
 
 enum Frequency {

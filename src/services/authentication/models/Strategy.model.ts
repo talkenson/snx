@@ -30,8 +30,8 @@ export const ZodAuthCredentials = z.discriminatedUnion('strategy', [
   ),
   z.object({ strategy: z.literal(AuthStrategy.VK) }).merge(
     z.object({
-      userId: z.number(),
-      signature: z.string(),
+      code: z.string(),
+      clientId: z.string().optional(),
     }),
   ),
   z.object({ strategy: z.literal(AuthStrategy.External) }).merge(

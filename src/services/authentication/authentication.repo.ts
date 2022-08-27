@@ -1,6 +1,15 @@
 import { PrismaClient } from '@prisma/client'
-import { Account } from '@/domain/account'
-import { RepositoryComplexData } from '@/types/database.types'
+import { Account, AccountOrigin } from '@/domain/account'
+
+export type CreateAccountPayload<O extends AccountOrigin> = Pick<
+  Account,
+  'origin'
+> &
+  (O extends AccountOrigin.Local
+    ? Required<Pick<Account, 'email' | 'password'>>
+    : O extends AccountOrigin.VK
+    ? Required<Pick<Account, 'externalId'>>
+    : never)
 
 export const authenticationRepo = ({ prisma }: { prisma: PrismaClient }) => ({
   async checkIfEmailExists(email: Account['email']) {
@@ -10,14 +19,47 @@ export const authenticationRepo = ({ prisma }: { prisma: PrismaClient }) => ({
       },
     }))
   },
-  async createAccount(data: Pick<Account, 'email' | 'password'>) {
+  async createAccount(data: CreateAccountPayload<AccountOrigin>) {
     return await prisma.account.create({
-      data: data,
+      data:
+        data.origin === AccountOrigin.Local
+          ? (data as Pick<Account, 'origin' | 'email' | 'password'>)
+          : ({ ...data, password: `integrated_over_${origin}` } as Pick<
+              Account,
+              'origin' | 'externalId' | 'password'
+            >),
     })
   },
-  async findUser(email: Account['email']) {
-    return prisma.account.findFirst({
-      where: { email: email },
+  async findUser(email: NonNullable<Account['email']>) {
+    return prisma.account.findUnique({
+      where: {
+        origin_email: {
+          email: email,
+          origin: AccountOrigin.Local,
+        },
+      },
+      include: {
+        profile: {
+          include: {
+            work: true,
+            contacts: true,
+            graduate: true,
+          },
+        },
+      },
+    })
+  },
+  async findUserByOrigin(
+    origin: Account['origin'],
+    externalId: NonNullable<Account['externalId']>,
+  ) {
+    return prisma.account.findUnique({
+      where: {
+        origin_externalId: {
+          origin: AccountOrigin.VK,
+          externalId: externalId,
+        },
+      },
       include: {
         profile: {
           include: {
@@ -30,7 +72,7 @@ export const authenticationRepo = ({ prisma }: { prisma: PrismaClient }) => ({
     })
   },
   async getAccountById(id: Account['id']) {
-    return prisma.account.findFirst({
+    return prisma.account.findUnique({
       where: { id: id },
       include: {
         profile: {
