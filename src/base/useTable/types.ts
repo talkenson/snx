@@ -50,6 +50,7 @@ export type Crud<T extends AnyRecord, PK extends SafeKeyTypes<T>> = {
   _merge<ExternalType = Record<string, any>>(
     externalItems: (Record<PK, T[PK]> & ExternalType)[],
   ): any[]
+  _import(externalSource: Readonly<Table<T, PK>>): void
   _clean(): void
   length(): number
 }

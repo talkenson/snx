@@ -29,6 +29,8 @@ export default defineConfig({
         ...Object.keys(pkg.devDependencies),
         'http',
         'crypto',
+        'fs/promises',
+        'path',
       ],
     },
   },

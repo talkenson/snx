@@ -177,6 +177,11 @@ export const useTableWithStore =
             : extElement,
         )
       },
+      _import(externalSource) {
+        STORAGE[tableName] = externalSource
+        const keys = Object.keys(externalSource)
+        lastId = keys.length ? Math.max(...keys.map(v => parseInt(v))) + 1 : 0
+      },
       _clean() {
         STORAGE[tableName] = {}
       },

@@ -29,6 +29,8 @@ interface ImportMetaEnv {
   readonly VITE_VK_CLIENT_SECRET: string
   readonly VITE_VK_CLIENT_DEFAULT_REDIRECT: string
   readonly VITE_TELEGRAM_BOT_TOKEN: string
+  readonly VITE_METRICS_PATH: string
+  readonly VITE_DUMP_METRICS_DELAY_SEC: string
 }
 
 interface ImportMeta {

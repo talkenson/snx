@@ -7,6 +7,7 @@ import { registerAuthenticateController } from '@/services/authentication/authen
 import { registerCardsController } from '@/services/cards/cards.controller'
 import { registerFilesController } from '@/services/files/files.controller'
 import { registerLikesController } from '@/services/likes/likes.controller'
+import { registerMetricsController } from '@/services/metrics/metrics.controller'
 import { registerProfileController } from '@/services/profile/profile.controller'
 import { registerSchemaController } from '@/services/schema/schema.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
@@ -29,6 +30,7 @@ export const {
     registerLikesController,
     registerFilesController,
     registerSchemaController,
+    registerMetricsController,
   ],
   {
     prisma: prisma,
