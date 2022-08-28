@@ -28,6 +28,7 @@ export default defineConfig({
         ...Object.keys(pkg.dependencies),
         ...Object.keys(pkg.devDependencies),
         'http',
+        'crypto',
       ],
     },
   },

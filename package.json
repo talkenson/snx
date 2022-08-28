@@ -1,6 +1,6 @@
 {
   "name": "@pokelabs/poke",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Poke - universal backend engine with WS and Rest API",
   "author": "@talkenson (https://github.com/talkenson)",
   "license": "UNLICENSED",
