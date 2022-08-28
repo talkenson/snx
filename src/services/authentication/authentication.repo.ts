@@ -7,7 +7,7 @@ export type CreateAccountPayload<O extends AccountOrigin> = Pick<
 > &
   (O extends AccountOrigin.Local
     ? Required<Pick<Account, 'email' | 'password'>>
-    : O extends AccountOrigin.VK
+    : O extends AccountOrigin.VK | AccountOrigin.Telegram
     ? Required<Pick<Account, 'externalId'>>
     : never)
 
@@ -56,7 +56,7 @@ export const authenticationRepo = ({ prisma }: { prisma: PrismaClient }) => ({
     return prisma.account.findUnique({
       where: {
         origin_externalId: {
-          origin: AccountOrigin.VK,
+          origin: origin,
           externalId: externalId,
         },
       },

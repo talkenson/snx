@@ -147,12 +147,12 @@ export const registerAuthenticateController = createController({
             return reject({ reason: AuthenticationError.VKAuthFailed })
           }
         } else if (payload.strategy === AuthStrategy.Telegram) {
-          if (!exists(payload.hash))
+          if (!exists(payload.data.hash))
             return reject({
               reason: AuthenticationError.TelegramHashNotPresented,
             })
 
-          const response = await getAuthStateFromPayload(payload)
+          const response = await getAuthStateFromPayload(payload.data)
 
           if (!response.status) {
             return reject({

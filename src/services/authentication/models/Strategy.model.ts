@@ -37,12 +37,14 @@ export const ZodAuthCredentials = z.discriminatedUnion('strategy', [
   ),
   z.object({ strategy: z.literal(AuthStrategy.Telegram) }).merge(
     z.object({
-      id: z.number(),
-      first_name: z.string(),
-      username: z.string().optional(),
-      photo_url: z.string().optional(),
-      auth_date: z.number(),
-      hash: z.string(),
+      data: z.object({
+        id: z.number(),
+        first_name: z.string(),
+        username: z.string().optional(),
+        photo_url: z.string().optional(),
+        auth_date: z.number(),
+        hash: z.string(),
+      }),
       clientId: z.string().optional(),
     }),
   ),
