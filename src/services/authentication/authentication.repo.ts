@@ -24,7 +24,7 @@ export const authenticationRepo = ({ prisma }: { prisma: PrismaClient }) => ({
       data:
         data.origin === AccountOrigin.Local
           ? (data as Pick<Account, 'origin' | 'email' | 'password'>)
-          : ({ ...data, password: `integrated_over_${origin}` } as Pick<
+          : ({ ...data, password: `integrated_over_${data.origin}` } as Pick<
               Account,
               'origin' | 'externalId' | 'password'
             >),
