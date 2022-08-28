@@ -13,6 +13,7 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
 export enum AccountOrigin {
   Local = 'Local',
   VK = 'VK',
+  Telegram = 'Telegram',
 }
 
 export const Account = z.object({

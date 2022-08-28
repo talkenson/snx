@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { createController } from '@/common/createController'
 import enEnums from '@/domain/enums/translations/en'
 import ruEnums from '@/domain/enums/translations/ru'
-import { Controller } from '@/types/controllerRelated.types'
 import { groupedInterests } from '@/domain/groupedInterests'
+import { Controller } from '@/types/controllerRelated.types'
 import { justLog } from '@/utils/justLog'
 
 const categoryPairs = Object.fromEntries(

@@ -6,6 +6,7 @@ export enum AuthStrategy {
   External = 'external',
   RefreshToken = 'refreshToken',
   VK = 'vk',
+  Telegram = 'telegram',
 }
 
 export enum RegisterStrategy {
@@ -31,6 +32,17 @@ export const ZodAuthCredentials = z.discriminatedUnion('strategy', [
   z.object({ strategy: z.literal(AuthStrategy.VK) }).merge(
     z.object({
       code: z.string(),
+      clientId: z.string().optional(),
+    }),
+  ),
+  z.object({ strategy: z.literal(AuthStrategy.Telegram) }).merge(
+    z.object({
+      id: z.number(),
+      first_name: z.string(),
+      username: z.string().optional(),
+      photo_url: z.string().optional(),
+      auth_date: z.number(),
+      hash: z.string(),
       clientId: z.string().optional(),
     }),
   ),

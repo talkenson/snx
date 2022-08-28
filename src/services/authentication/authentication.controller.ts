@@ -16,6 +16,7 @@ import { extractJwtInfo } from '@/utils/authentication/extractJwtInfo'
 import { issueNewToken } from '@/utils/authentication/issueNewToken'
 import { exists } from '@/utils/exists'
 import { justLog } from '@/utils/justLog'
+import { getAuthStateFromPayload } from '@/utils/oauth/telegram/getAuthStateFromPayload'
 import { getAccessTokenFromCode } from '@/utils/oauth/vk/getAccessTokenFromCode'
 
 export const registerAuthenticateController = createController({
@@ -145,6 +146,47 @@ export const registerAuthenticateController = createController({
           } else {
             return reject({ reason: AuthenticationError.VKAuthFailed })
           }
+        } else if (payload.strategy === AuthStrategy.Telegram) {
+          if (!exists(payload.hash))
+            return reject({
+              reason: AuthenticationError.TelegramHashNotPresented,
+            })
+
+          const response = await getAuthStateFromPayload(payload)
+
+          if (!response.status) {
+            return reject({
+              reason: AuthenticationError.TelegramAuthFailed,
+              details: response.data,
+            })
+          }
+
+          const { id: userId } = response.data
+
+          const auth = await repository.findUserByOrigin(
+            AccountOrigin.Telegram,
+            userId,
+          )
+          let account: Account | null = auth as Account | null
+          if (!exists(auth)) {
+            // create user if this is first time
+            account = (await repository.createAccount({
+              origin: AccountOrigin.Telegram,
+              externalId: userId,
+            })) as Account
+          }
+
+          if (exists(account)) {
+            return resolve(
+              await issueNewToken(
+                account as Account,
+                repository.refreshTokenUpdater,
+                payload.clientId,
+              ),
+            )
+          } else {
+            return reject({ reason: AuthenticationError.TelegramAuthFailed })
+          }
         } else {
           return reject({
             reason: AuthenticationError.UnsupportedStrategy,
@@ -191,7 +233,7 @@ export const registerAuthenticateController = createController({
 
             return resolve(
               await issueNewToken(
-                auth,
+                auth as Account,
                 repository.refreshTokenUpdater,
                 payload.clientId,
               ),
