@@ -24,14 +24,10 @@ export default defineConfig({
     outDir: path.resolve(__dirname, './dist'),
     emptyOutDir: true,
     rollupOptions: {
-      external: [
-        ...Object.keys(pkg.dependencies),
-        ...Object.keys(pkg.devDependencies),
-        'http',
-        'crypto',
-        'fs/promises',
-        'path',
-      ],
+      external: module =>
+        !module.startsWith('.') &&
+        !module.startsWith('@/') &&
+        !module.startsWith(path.resolve(__dirname, '../src')),
     },
   },
   server: {
