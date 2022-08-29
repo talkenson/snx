@@ -27,7 +27,7 @@ export default defineConfig({
       external: module =>
         !module.startsWith('.') &&
         !module.startsWith('@/') &&
-        !module.startsWith(path.resolve(__dirname, '../src')),
+        !module.startsWith(path.resolve(__dirname, './src')),
     },
   },
   server: {
