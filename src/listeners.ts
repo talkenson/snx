@@ -11,6 +11,7 @@ import { registerMetricsController } from '@/services/metrics/metrics.controller
 import { registerProfileController } from '@/services/profile/profile.controller'
 import { registerSchemaController } from '@/services/schema/schema.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
+import { registerTelegramBotController } from '@/services/telegram-bot/telegram-bot.controller'
 import { justLog } from '@/utils/justLog'
 
 justLog.info('Creating registration handles...')
@@ -31,6 +32,7 @@ export const {
     registerFilesController,
     registerSchemaController,
     registerMetricsController,
+    registerTelegramBotController,
   ],
   {
     prisma: prisma,

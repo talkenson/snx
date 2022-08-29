@@ -3,8 +3,6 @@ import { defineConfig, Plugin } from 'vite'
 import topLevelAwait from 'vite-plugin-top-level-await'
 import viteTsconfigPaths from 'vite-tsconfig-paths'
 
-import pkg from './package.json'
-
 export default defineConfig({
   plugins: [
     viteTsconfigPaths() as Plugin,

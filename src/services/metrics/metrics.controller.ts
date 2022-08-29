@@ -46,5 +46,27 @@ export const registerMetricsController: Controller<
         return resolve({ clicks: repository.getButtonClicks() })
       },
     )
+    addListener<ButtonClickInput>(
+      {
+        eventName: 'getBotStarts',
+        description: 'Get bot /start commands',
+        requireAuth: true,
+        restMethods: ['POST', 'GET'],
+      },
+      (resolve, reject, context) => () => {
+        return resolve({ starts: repository.getBotStarts() })
+      },
+    )
+    addListener<ButtonClickInput>(
+      {
+        eventName: 'getBotSubscribes',
+        description: 'Get bot /notify commands',
+        requireAuth: true,
+        restMethods: ['POST', 'GET'],
+      },
+      (resolve, reject, context) => () => {
+        return resolve({ starts: repository.getBotSubscribes() })
+      },
+    )
   },
 })

@@ -19,7 +19,7 @@ import { exists } from '@/utils/exists'
 
 export const websocketRegistrar =
   ({ prisma }: RegistrarInjection): EventControllerRegistrar =>
-  (io: Server, socket: Socket, { userId, profileId, clientId }) =>
+  (io: Server, socket: Socket, { userId, clientId }) =>
   async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
 
@@ -138,7 +138,6 @@ export const websocketRegistrar =
         listenerFn({
           transport: 'ws',
           userId: userId,
-          profileId: profileId,
           clientId: clientId,
           event: eventName,
         })(hash, ...args),

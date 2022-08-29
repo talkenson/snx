@@ -149,7 +149,6 @@ export const restRegistrar =
           return listenerFn({
             transport: 'rest',
             userId: res.locals.userId,
-            profileId: res.locals.profileId,
             clientId: res.locals.clientId,
             event: eventName,
           })(res, { ...req.query, ...req.body })

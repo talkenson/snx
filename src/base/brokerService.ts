@@ -33,7 +33,7 @@ const createNATSConnection = async (): Promise<{
 
   const sc = StringCodec()
 
-  const subscription = nc.subscribe(`${POKE_API_BROKER_PREFIX}.request`) // poke.api.request.CLIENT_ID
+  const subscription = nc.subscribe(`${POKE_API_BROKER_PREFIX}.request`)
 
   addBeforeExitHook(async () => {
     justLog.info('Draining NATS queue...')

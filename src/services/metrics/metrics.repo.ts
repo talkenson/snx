@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
+import botStartedMetricsStore from '@/services/metrics/stores/botStartedStore'
 import buttonClickMetricsStore from '@/services/metrics/stores/buttonClickMetricsStore'
 import landingMetricsStore from '@/services/metrics/stores/landingMetricsStore'
+import botSubscribedMetricsStore from '@/services/metrics/stores/subscribedStore'
 import {
   ButtonClickInput,
   LandingOpenInput,
@@ -21,5 +23,11 @@ export const metricsRepo = () => ({
   },
   getButtonClicks() {
     return buttonClickMetricsStore.length()
+  },
+  getBotStarts() {
+    return botStartedMetricsStore.dump()
+  },
+  getBotSubscribes() {
+    return botSubscribedMetricsStore.dump()
   },
 })
