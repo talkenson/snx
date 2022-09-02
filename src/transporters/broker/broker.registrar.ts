@@ -1,10 +1,9 @@
 import { StringCodec } from 'nats'
-import { publish } from '@/base/brokerService'
 import { combineAuthRequired } from '@/common/controllers/combineAuthRequired'
 import { getAddListenerMetadata } from '@/common/controllers/getAddListenerMetadata'
 import { handlerRestrictUnauthorized } from '@/common/controllers/handlerRestrictUnauthorized'
 import { CommonError } from '@/common/enums/common.error'
-import { POKE_API_BROKER_PREFIX } from '@/config/secrets'
+import { POKE_API_BROKER_PREFIX } from '@/config/broker'
 import {
   BrokerControllerRegistrar,
   BrokerListenerMap,
@@ -34,7 +33,7 @@ const createBrokerResponse = (
 
 export const brokerRegistrar =
   ({ prisma }: RegistrarInjection): BrokerControllerRegistrar =>
-  (subscription: BrokerSubscription) =>
+  ({ subscription, publish }) =>
   async (controllers: Controller[]) => {
     const brokerListenerMap: BrokerListenerMap = new Map()
 
@@ -141,15 +140,15 @@ export const brokerRegistrar =
       )
     })
 
-    for await (const message of subscription) {
+    for await (const message of subscription!) {
       const payload = parseJSON(brokerStringCodec.decode(message.data)) as
         | BrokerRequestPayload
         | undefined
-      if (!payload || !payload.hash || !payload.eventName) {
+      if (!payload || !payload.hash || !payload.event) {
         continue
       }
 
-      const listenerWrapper = brokerListenerMap.get(payload.eventName)
+      const listenerWrapper = brokerListenerMap.get(payload.event)
 
       if (listenerWrapper) {
         listenerWrapper.listener({
@@ -157,7 +156,7 @@ export const brokerRegistrar =
           userId: -1,
           profileId: -1,
           clientId: 'broker',
-          event: payload.eventName,
+          event: payload.event,
         })(payload.hash, payload.payload)
       } else {
         continue

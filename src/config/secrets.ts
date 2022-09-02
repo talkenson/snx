@@ -3,7 +3,6 @@ const DEFAULT_REFRESH_TOKEN_LENGTH = 64
 const DEFAULT_JWT_LIFETIME_SEC = 3600
 const DEFAULT_JWT_ISSUER = 'poke-default'
 const DEFAULT_CLIENT_ID = 'default'
-export const POKE_API_BROKER_PREFIX = 'poke.api'
 
 export const JWT_KEY = (() => {
   const envJwtKey = import.meta.env.VITE_JWT_KEY
@@ -62,25 +61,6 @@ export const CONTEXT_FALLBACK_CLIENT_ID = (() => {
   }
   return fallbackClientId
 })()
-
-export const NATS_USE_FLAG = (() => {
-  const useNats = import.meta.env.VITE_USE_NATS
-  return useNats && useNats.length
-})()
-
-export const NATS_SERVER_ADDRESS = (() => {
-  const natsAddr = import.meta.env.VITE_NATS_SERVER
-  if (!natsAddr) {
-    console.warn('Environment VITE_NATS_SERVER key not found or invalid')
-    return undefined
-  } else {
-    return natsAddr
-  }
-})()
-
-export const NATS_SERVER_USER = import.meta.env.VITE_NATS_SERVER_USER
-
-export const NATS_SERVER_PASS = import.meta.env.VITE_NATS_SERVER_PASS
 
 export const AWS_ACCESS_KEY = import.meta.env.VITE_AWS_ACCESS_KEY
 

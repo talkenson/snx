@@ -3,7 +3,7 @@ import { Router } from 'express'
 import { Server } from 'socket.io'
 import { Account } from '@/domain/account'
 import { Profile } from '@/domain/profile'
-import { BrokerSubscription } from '@/transporters/broker/types'
+import { BrokerExported, BrokerSubscription } from '@/transporters/broker/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { AddListenerFunction } from '@/types/listenerRelated.types'
 
@@ -44,7 +44,7 @@ export type RegistrarTypedParameterSet<T extends PokeTransport> = T extends 'ws'
   : T extends 'rest'
   ? { router: Router }
   : T extends 'broker'
-  ? { subscription: BrokerSubscription }
+  ? { initializer: () => Promise<BrokerExported> }
   : never
 
 export type ControllerRegistrarParameters = {

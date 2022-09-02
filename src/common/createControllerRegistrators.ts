@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { Router } from 'express'
 import { SchemaItem } from '@/services/schema/models/SchemaItem.model'
-import { brokerRegistrar } from '@/transporters/broker/broker.registrar'
+import { internalRegistrar } from '@/transporters/broker/internal.registrar'
 import { restRegistrar } from '@/transporters/rest/rest.registrar'
 import { websocketRegistrar } from '@/transporters/websocket/websocket.registrar'
 import {
@@ -16,8 +16,8 @@ export const createControllerRegistrar = (
   {
     ws,
     rest,
-    broker,
     prisma,
+    broker,
   }: ControllerRegistrarParameters & { prisma: PrismaClient },
 ): {
   registerAllEventControllers: () => void
@@ -45,13 +45,20 @@ export const createControllerRegistrar = (
     return rest.router
   }
 
-  const registerAllBrokerControllers = () => {
-    brokerRegistrar({ prisma })(broker.subscription)(controllers)
-  }
+  broker
+    .initializer()
+    .then(({ publish, internalSubscription, subscription }) => {
+      const autoRegisterInternalBrokerCommunications = () => {
+        internalRegistrar({ prisma })(internalSubscription!, publish)(
+          controllers,
+        )
+      }
+      //autoRegisterInternalBrokerCommunications()
+    })
 
   return {
     registerAllEventControllers,
     registerAllRestControllers,
-    registerAllBrokerControllers,
+    registerAllBrokerControllers: () => false,
   }
 }
