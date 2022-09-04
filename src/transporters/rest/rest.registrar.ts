@@ -21,7 +21,7 @@ import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 
 export const restRegistrar =
-  ({ prisma }: RegistrarInjection): RestControllerRegistrar =>
+  ({ prisma, makeRequest }: RegistrarInjection): RestControllerRegistrar =>
   (router: Router) =>
   async (controllers: Controller[], graphBase: SchemaItem[]) => {
     const restListenerMap: RestListenerMap = new Map()
@@ -113,18 +113,13 @@ export const restRegistrar =
          * Then listener is more important, then controller
          */
 
-        if (metadata.transports) {
-          if (metadata.transports.includes('rest')) {
-            setRestListener()
-          } else {
-            setFallbackRestListener()
-          }
+        if (
+          metadata.transports?.includes('rest') ||
+          controllerTransport?.includes('rest')
+        ) {
+          setRestListener()
         } else {
-          if (controllerTransport?.includes('rest')) {
-            setRestListener()
-          } else {
-            setFallbackRestListener()
-          }
+          setFallbackRestListener()
         }
       }
 
@@ -136,6 +131,7 @@ export const restRegistrar =
           controller.transport,
         ),
         controller.repository ? controller.repository({ prisma }) : undefined,
+        makeRequest,
       )
     })
 

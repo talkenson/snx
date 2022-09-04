@@ -20,6 +20,5 @@ export const NATS_SERVER_USER = import.meta.env.VITE_NATS_SERVER_USER
 
 export const NATS_SERVER_PASS = import.meta.env.VITE_NATS_SERVER_PASS
 
-export const BROKER_INTERNAL_SUBJECT = (() => {
-  return import.meta.env.VITE_BROKER_INTERNAL_SUBJECT || DEFAULT_BROKER_INTERNAL
-})()
+export const BROKER_INTERNAL_SUBJECT =
+  import.meta.env.VITE_BROKER_INTERNAL_SUBJECT || DEFAULT_BROKER_INTERNAL

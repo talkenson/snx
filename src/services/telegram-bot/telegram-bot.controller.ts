@@ -1,12 +1,14 @@
 import { createController } from '@/common/createController'
 import {
   onCommand,
+  sendMessage,
   startBot,
   stopBot,
 } from '@/services/telegram-bot/telegram-bot.handler'
 import { telegramBotRepo } from '@/services/telegram-bot/telegram-bot.repo'
 import { Controller } from '@/types/controllerRelated.types'
 import { justLog } from '@/utils/justLog'
+import { AccountOrigin } from '@/domain/account'
 
 export const registerTelegramBotController: Controller<
   ReturnType<typeof telegramBotRepo>
@@ -14,7 +16,32 @@ export const registerTelegramBotController: Controller<
   scope: 'telegram',
   requireAuth: false,
   repository: telegramBotRepo,
-  register: (addListener, repository) => {
+  register: (addListener, repository, makeRequest) => {
+    addListener<{ target: number; text: string }>(
+      {
+        eventName: 'sendMessage',
+        description: 'send message to a specific user id',
+      },
+      (resolve, reject, context) =>
+        async ({ target, text }) => {
+          const message = await sendMessage(target, text)
+          makeRequest({
+            event: 'authentication/getAccountId',
+            payload: {
+              origin: AccountOrigin.Telegram,
+              externalId: message.chat.id,
+            },
+          })
+            .then(result => {
+              return resolve({ message, result })
+            })
+            .catch(e => {
+              return reject({ message, error: e })
+            })
+        },
+    )
+  },
+  setup: async repository => {
     startBot()
 
     onCommand('start', ctx => {

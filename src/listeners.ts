@@ -18,26 +18,23 @@ justLog.info('Creating registration handles...')
 
 const router = Router()
 
-export const {
-  registerAllEventControllers,
-  registerAllRestControllers,
-  registerAllBrokerControllers,
-} = createControllerRegistrar(
-  [
-    registerAuthenticateController,
-    registerCardsController,
-    registerProfileController,
-    registerSparkController,
-    registerLikesController,
-    registerFilesController,
-    registerSchemaController,
-    registerMetricsController,
-    registerTelegramBotController,
-  ],
-  {
-    prisma: prisma,
-    ws: { io: ioServer },
-    rest: { router },
-    broker: { initializer: createNATSConnection },
-  },
-)
+export const { registerAllEventControllers, registerAllRestControllers } =
+  await createControllerRegistrar(
+    [
+      registerAuthenticateController,
+      registerCardsController,
+      registerProfileController,
+      registerSparkController,
+      registerLikesController,
+      registerFilesController,
+      registerSchemaController,
+      registerMetricsController,
+      registerTelegramBotController,
+    ],
+    {
+      prisma: prisma,
+      ws: { io: ioServer },
+      rest: { router },
+      broker: { initializer: createNATSConnection },
+    },
+  )

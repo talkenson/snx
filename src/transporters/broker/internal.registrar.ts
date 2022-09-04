@@ -16,23 +16,26 @@ import {
 } from '@/types/listenerRelated.types'
 import { RegistrarInjection } from '@/types/registrar.types'
 import { parseJSON } from '@/utils/parseJSON'
+import { justLog } from '@/utils/justLog'
+import { BROKER_INTERNAL_SUBJECT } from '@/config/broker'
 
 const stringCodec = StringCodec()
 
-const createBrokerResponse = (
-  eventName: string,
-  hash: string,
-  status: string,
-  payload: any,
-) => {
-  return { status, eventName, hash, payload }
-}
-
 export const internalRegistrar =
-  ({ prisma }: RegistrarInjection): InternalBrokerControllerRegistrar =>
-  ({ internalSubscription, makeRequest }) =>
+  ({
+    prisma,
+    makeRequest,
+  }: RegistrarInjection): InternalBrokerControllerRegistrar =>
+  ({ internalSubscription, publish }) =>
   async (controllers: Controller[]) => {
     const internalMap: InternalListenerMap = new Map()
+
+    publish(BROKER_INTERNAL_SUBJECT, {
+      event: 'internal/register',
+      payload: {
+        service: 'internal_transport',
+      },
+    } as BrokerRequestPayload)
 
     const createResolve = (message: BrokerMessage) => (result: any) =>
       message.respond(
@@ -49,7 +52,7 @@ export const internalRegistrar =
         stringCodec.encode(
           JSON.stringify({
             status: 'rejected',
-            reason,
+            result: reason,
           }),
         ),
       )
@@ -91,35 +94,56 @@ export const internalRegistrar =
       }
 
     await controllers.forEach(controller => {
-      controller.register(
-        addListener(
-          controller.scope,
-          controller.requireAuth,
-          controller.transport,
+      const repository = controller.repository
+        ? controller.repository({ prisma })
+        : undefined
+      const setup = controller.setup || (() => new Promise<void>(res => res()))
+      setup(repository).then(() =>
+        controller.register(
+          addListener(
+            controller.scope,
+            controller.requireAuth,
+            controller.transport,
+          ),
+          repository,
+          makeRequest,
         ),
-        controller.repository ? controller.repository({ prisma }) : undefined,
       )
     })
 
-    for await (const message of internalSubscription) {
-      const payload = parseJSON(stringCodec.decode(message.data)) as
-        | BrokerRequestPayload
-        | undefined
-      if (!payload || !payload.event) {
-        continue
-      }
+    setInterval(() => {
+      publish(BROKER_INTERNAL_SUBJECT, {
+        event: 'telegram/sendMessage',
+        payload: {
+          target: 1115872701,
+          text: 'hi',
+        },
+      } as BrokerRequestPayload)
+    }, 1000)
 
-      const listenerWrapper = internalMap.get(payload.event)
+    await (async () => {
+      for await (const message of internalSubscription) {
+        const payload = parseJSON(stringCodec.decode(message.data)) as
+          | BrokerRequestPayload
+          | undefined
+        if (!payload || !payload.event) {
+          continue
+        }
 
-      if (listenerWrapper) {
-        listenerWrapper.listener({
-          transport: 'broker',
-          userId: -1,
-          clientId: 'broker',
-          event: payload.event,
-        })(message, payload.payload)
-      } else {
-        continue
+        // justLog.log(payload)
+
+        const listenerWrapper = internalMap.get(payload.event)
+
+        if (listenerWrapper) {
+          listenerWrapper.listener({
+            transport: 'broker',
+            userId: -1,
+            clientId: 'broker',
+            event: payload.event,
+          })(message, payload.payload)
+        } else {
+          continue
+        }
       }
-    }
+    })()
   }

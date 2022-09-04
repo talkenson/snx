@@ -1,4 +1,4 @@
-import { connect, JSONCodec, RequestOptions } from 'nats'
+import { connect, JSONCodec, RequestOptions, StringCodec } from 'nats'
 import { z } from 'zod'
 import { CommonError } from '@/common/enums/common.error'
 import {
@@ -25,6 +25,16 @@ const zodInternalMessageFormat = z.object({
   payload: z.any(),
 })
 
+enum Status {
+  Resolved = 'resolved',
+  Rejected = 'rejected',
+}
+
+const zodInternalReplyFormat = z.object({
+  status: z.nativeEnum(Status),
+  result: z.any(),
+})
+
 const createNATSConnection = (): Promise<BrokerExported> => {
   justLog.info(`NATS: Connecting to NATS server...`)
   return connect({
@@ -35,6 +45,7 @@ const createNATSConnection = (): Promise<BrokerExported> => {
     .then(natsConnection => {
       justLog.success(`NATS: Connected to ${natsConnection.getServer()}`)
       const jsonCodec = JSONCodec()
+      const stringCodec = StringCodec()
 
       let subscription: BrokerSubscription | undefined = undefined
       if (!NATS_USE_FLAG) {
@@ -42,6 +53,8 @@ const createNATSConnection = (): Promise<BrokerExported> => {
           `${POKE_API_BROKER_PREFIX}.request`,
         )
       }
+
+      justLog.info('Internal subject named as', BROKER_INTERNAL_SUBJECT)
 
       const internalSubscription = natsConnection.subscribe(
         BROKER_INTERNAL_SUBJECT,
@@ -56,33 +69,47 @@ const createNATSConnection = (): Promise<BrokerExported> => {
         channel: string,
         data: Record<any, any>,
         options,
-      ) =>
-        natsConnection.isClosed()
-          ? justLog.error('ERROR: NATS Publishing when connection is closed!')
-          : natsConnection.publish(channel, jsonCodec.encode(data), options)
+      ) => {
+        if (natsConnection.isClosed())
+          return justLog.error(
+            'ERROR: NATS Publishing when connection is closed!',
+          )
+
+        natsConnection.publish(
+          channel,
+          stringCodec.encode(JSON.stringify(data)),
+          options,
+        )
+      }
 
       const makeRequest = <ExpectedResult = unknown>(
-        channel: string,
         data: Record<any, any>,
         options?: Partial<RequestOptions>,
-      ): Promise<{ status: 'resolved'; result: ExpectedResult }> => {
+      ): Promise<{ status: Status.Resolved; result: ExpectedResult }> => {
         return new Promise((_res, _rej) => {
           const res = (result: ExpectedResult) =>
-            _res({ status: 'resolved', result })
+            _res({ status: Status.Resolved, result })
 
-          const rej = (reason: unknown) => _rej({ status: 'rejected', reason })
+          const rej = (reason: unknown) =>
+            _rej({ status: Status.Rejected, result: reason })
 
           if (natsConnection.isClosed())
             rej({ reason: 'ERROR: NATS Publishing when connection is closed!' })
 
           natsConnection
-            .request(channel, jsonCodec.encode(data), {
-              timeout: 10000,
-              ...options,
-            })
+            .request(
+              BROKER_INTERNAL_SUBJECT,
+              stringCodec.encode(JSON.stringify(data)),
+              {
+                timeout: 10000,
+                ...options,
+              },
+            )
             .then(result => {
+              justLog.warn('request succeeded')
+
               const data = jsonCodec.decode(result.data)
-              const validation = zodInternalMessageFormat.safeParse(data)
+              const validation = zodInternalReplyFormat.safeParse(data)
               if (validation && !validation.success) {
                 return rej({
                   reason: CommonError.InvalidPayload,
@@ -93,12 +120,23 @@ const createNATSConnection = (): Promise<BrokerExported> => {
                       message,
                     }),
                   ),
+                  message: validation.error.toString(),
                 })
               }
-              res(data as ExpectedResult)
+              if (
+                Object.prototype.hasOwnProperty.call(data, 'status') &&
+                (data as { status: Status.Resolved; result: ExpectedResult })
+                  .status === Status.Resolved
+              ) {
+                res(
+                  (data as { status: Status.Resolved; result: ExpectedResult })
+                    .result as ExpectedResult,
+                )
+              }
+              rej((data as { status: Status.Rejected; result: unknown }).result)
             })
             .catch(error => {
-              rej(error)
+              rej({ status: Status.Rejected, result: { ...error } })
             })
         })
       }
@@ -119,7 +157,7 @@ const createNATSConnection = (): Promise<BrokerExported> => {
     })
     .catch(e => {
       justLog.error('Error connecting to NATS server')
-      justLog.error(e)
+      justLog.error(e.stack)
 
       return {
         publish: () => justLog.warn('NATS Server not connected'),

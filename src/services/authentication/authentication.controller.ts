@@ -246,5 +246,18 @@ export const registerAuthenticateController = createController({
         }
       },
     )
+
+    addListener<{ origin: AccountOrigin; externalId: number }>(
+      {
+        eventName: 'getAccountId',
+        description: 'get account id by credentials',
+        requireAuth: false,
+      },
+      (resolve, reject, context) =>
+        async ({ origin, externalId }) => {
+          const account = await repository.findUserByOrigin(origin, externalId)
+          return resolve({ account })
+        },
+    )
   },
 })

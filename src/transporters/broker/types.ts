@@ -33,9 +33,13 @@ export type BrokerSubscription = Subscription
 
 export type BrokerMessage = Msg
 
+export type BrokerMakeRequestData<T = Record<any, any>> = {
+  event: string
+  payload: T
+}
+
 export type BrokerMakeRequest = <ExpectedResult = unknown>(
-  channel: string,
-  data: Record<any, any>,
+  data: BrokerMakeRequestData,
   options?: Partial<RequestOptions>,
 ) => Promise<{
   status: 'resolved'
