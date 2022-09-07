@@ -3,7 +3,11 @@ import { Router } from 'express'
 import { Server } from 'socket.io'
 import { Account } from '@/domain/account'
 import { Profile } from '@/domain/profile'
-import { BrokerSubscription } from '@/transporters/broker/types'
+import {
+  BrokerExported,
+  BrokerMakeRequest,
+  BrokerSubscription,
+} from '@/transporters/broker/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { AddListenerFunction } from '@/types/listenerRelated.types'
 
@@ -22,7 +26,12 @@ export type InvalidationFunction = () => void
 export type ControllerRegisterer<RepositoryType> = (
   addListener: AddListenerFunction,
   repository: RepositoryType,
+  makeRequest: BrokerMakeRequest,
 ) => InvalidationFunction | void
+
+export type ControllerSetup<RepositoryType> = (
+  repository: RepositoryType,
+) => Promise<InvalidationFunction | void>
 
 export type DefaultRepositoryType = Record<string, CallableFunction>
 
@@ -37,6 +46,7 @@ export type Controller<
   requireAuth?: boolean
   repository?: RepositoryBuilder<RepositoryType>
   register: ControllerRegisterer<RepositoryType>
+  setup?: ControllerSetup<RepositoryType>
 }
 
 export type RegistrarTypedParameterSet<T extends PokeTransport> = T extends 'ws'
@@ -44,7 +54,7 @@ export type RegistrarTypedParameterSet<T extends PokeTransport> = T extends 'ws'
   : T extends 'rest'
   ? { router: Router }
   : T extends 'broker'
-  ? { subscription: BrokerSubscription }
+  ? { initializer: () => Promise<BrokerExported> }
   : never
 
 export type ControllerRegistrarParameters = {

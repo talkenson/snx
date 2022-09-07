@@ -19,18 +19,19 @@ import {
 } from '@/types/listenerRelated.types'
 import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
+import { buildRejectedResult, buildResolvedResult } from '@/common/builders'
 
 export const restRegistrar =
-  ({ prisma }: RegistrarInjection): RestControllerRegistrar =>
+  ({ prisma, makeRequest }: RegistrarInjection): RestControllerRegistrar =>
   (router: Router) =>
   async (controllers: Controller[], graphBase: SchemaItem[]) => {
     const restListenerMap: RestListenerMap = new Map()
 
     const createRestResolve = (res: RestResponse) => (result: any) =>
-      res.json({ status: 'resolved', result: result })
+      res.json(buildResolvedResult(result))
 
     const createRestReject = (res: RestResponse) => (result: any) =>
-      res.json({ status: 'rejected', result: result })
+      res.json(buildRejectedResult(result))
 
     const addListener =
       (
@@ -52,7 +53,7 @@ export const restRegistrar =
         graphBase.push({
           scope: scope,
           action: eventName,
-          transports: metadata.transports || controllerTransport || ['ws'],
+          transports: metadata.transports || controllerTransport || ['broker'],
           schema: metadata.schema,
           authRequired: authFlag,
           description: metadata.description,
@@ -113,18 +114,13 @@ export const restRegistrar =
          * Then listener is more important, then controller
          */
 
-        if (metadata.transports) {
-          if (metadata.transports.includes('rest')) {
-            setRestListener()
-          } else {
-            setFallbackRestListener()
-          }
+        if (
+          metadata.transports?.includes('rest') ||
+          controllerTransport?.includes('rest')
+        ) {
+          setRestListener()
         } else {
-          if (controllerTransport?.includes('rest')) {
-            setRestListener()
-          } else {
-            setFallbackRestListener()
-          }
+          setFallbackRestListener()
         }
       }
 
@@ -136,6 +132,7 @@ export const restRegistrar =
           controller.transport,
         ),
         controller.repository ? controller.repository({ prisma }) : undefined,
+        makeRequest,
       )
     })
 

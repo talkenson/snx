@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { ioServer } from '@/base'
-import { subscription } from '@/base/brokerService'
 import { createControllerRegistrar } from '@/common/createControllerRegistrators'
 import { prisma } from '@/db'
 import { registerAuthenticateController } from '@/services/authentication/authentication.controller'
@@ -13,31 +12,29 @@ import { registerSchemaController } from '@/services/schema/schema.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
 import { registerTelegramBotController } from '@/services/telegram-bot/telegram-bot.controller'
 import { justLog } from '@/utils/justLog'
+import { createNATSConnection } from '@/base/brokerService'
 
 justLog.info('Creating registration handles...')
 
 const router = Router()
 
-export const {
-  registerAllEventControllers,
-  registerAllRestControllers,
-  registerAllBrokerControllers,
-} = createControllerRegistrar(
-  [
-    registerAuthenticateController,
-    registerCardsController,
-    registerProfileController,
-    registerSparkController,
-    registerLikesController,
-    registerFilesController,
-    registerSchemaController,
-    registerMetricsController,
-    registerTelegramBotController,
-  ],
-  {
-    prisma: prisma,
-    ws: { io: ioServer },
-    rest: { router },
-    broker: { subscription },
-  },
-)
+export const { registerAllEventControllers, registerAllRestControllers } =
+  await createControllerRegistrar(
+    [
+      registerAuthenticateController,
+      registerCardsController,
+      registerProfileController,
+      registerSparkController,
+      registerLikesController,
+      registerFilesController,
+      registerSchemaController,
+      registerMetricsController,
+      registerTelegramBotController,
+    ],
+    {
+      prisma: prisma,
+      ws: { io: ioServer },
+      rest: { router },
+      broker: { initializer: createNATSConnection },
+    },
+  )([])

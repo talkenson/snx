@@ -12,6 +12,7 @@ export const createController = <
   requireAuth?: Controller['requireAuth']
   repository?: Controller<Repository>['repository']
   register: ControllerRegisterer<Repository>
+  setup?: Controller<Repository>['setup']
 }): Controller<Repository> => {
   return {
     scope: controller.scope,
@@ -19,5 +20,6 @@ export const createController = <
     requireAuth: controller.requireAuth,
     repository: controller.repository,
     register: controller.register,
+    setup: controller.setup,
   }
 }

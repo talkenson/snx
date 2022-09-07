@@ -18,7 +18,7 @@ import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 
 export const websocketRegistrar =
-  ({ prisma }: RegistrarInjection): EventControllerRegistrar =>
+  ({ prisma, makeRequest }: RegistrarInjection): EventControllerRegistrar =>
   (io: Server, socket: Socket, { userId, clientId }) =>
   async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
@@ -99,22 +99,13 @@ export const websocketRegistrar =
           })
         }
 
-        /**
-         * Defaults to only WS API if some specific options wasn't passed
-         * Then listener is more important, then controller
-         */
-        if (metadata.transports?.includes('ws')) {
+        if (
+          metadata.transports?.includes('ws') ||
+          controllerTransport?.includes('ws')
+        ) {
           setEventListener()
         } else {
-          if (!controllerTransport || !controllerTransport.length) {
-            setEventListener()
-          } else {
-            if (controllerTransport.includes('ws')) {
-              setEventListener()
-            } else {
-              setFallbackEventListener()
-            }
-          }
+          setFallbackEventListener()
         }
       }
 
@@ -126,6 +117,7 @@ export const websocketRegistrar =
           controller.transport,
         ),
         controller.repository ? controller.repository({ prisma }) : undefined,
+        makeRequest,
       )
     })
 
