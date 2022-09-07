@@ -19,6 +19,7 @@ import {
 } from '@/types/listenerRelated.types'
 import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
+import { buildRejectedResult, buildResolvedResult } from '@/common/builders'
 
 export const restRegistrar =
   ({ prisma, makeRequest }: RegistrarInjection): RestControllerRegistrar =>
@@ -27,10 +28,10 @@ export const restRegistrar =
     const restListenerMap: RestListenerMap = new Map()
 
     const createRestResolve = (res: RestResponse) => (result: any) =>
-      res.json({ status: 'resolved', result: result })
+      res.json(buildResolvedResult(result))
 
     const createRestReject = (res: RestResponse) => (result: any) =>
-      res.json({ status: 'rejected', result: result })
+      res.json(buildRejectedResult(result))
 
     const addListener =
       (

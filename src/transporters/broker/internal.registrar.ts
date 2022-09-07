@@ -18,6 +18,7 @@ import { RegistrarInjection } from '@/types/registrar.types'
 import { parseJSON } from '@/utils/parseJSON'
 import { justLog } from '@/utils/justLog'
 import { BROKER_INTERNAL_SUBJECT } from '@/config/broker'
+import { buildRejectedResult, buildResolvedResult } from '@/common/builders'
 
 const stringCodec = StringCodec()
 
@@ -32,22 +33,12 @@ export const internalRegistrar =
 
     const createResolve = (message: BrokerMessage) => (result: any) =>
       message.respond(
-        stringCodec.encode(
-          JSON.stringify({
-            status: 'resolved',
-            result,
-          }),
-        ),
+        stringCodec.encode(JSON.stringify(buildResolvedResult(result))),
       )
 
     const createReject = (message: BrokerMessage) => (reason: unknown) =>
       message.respond(
-        stringCodec.encode(
-          JSON.stringify({
-            status: 'rejected',
-            result: reason,
-          }),
-        ),
+        stringCodec.encode(JSON.stringify(buildRejectedResult(reason))),
       )
 
     const addListener =
@@ -90,7 +81,7 @@ export const internalRegistrar =
       const repository = controller.repository
         ? controller.repository({ prisma })
         : undefined
-      const setup = controller.setup || (() => new Promise<void>(res => res()))
+      const setup = controller.setup ?? (() => Promise.resolve())
       setup(repository).then(() =>
         controller.register(
           addListener(
