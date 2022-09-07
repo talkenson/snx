@@ -37,4 +37,4 @@ export const { registerAllEventControllers, registerAllRestControllers } =
       rest: { router },
       broker: { initializer: createNATSConnection },
     },
-  )
+  )([])

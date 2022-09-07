@@ -30,13 +30,6 @@ export const internalRegistrar =
   async (controllers: Controller[]) => {
     const internalMap: InternalListenerMap = new Map()
 
-    publish(BROKER_INTERNAL_SUBJECT, {
-      event: 'internal/register',
-      payload: {
-        service: 'internal_transport',
-      },
-    } as BrokerRequestPayload)
-
     const createResolve = (message: BrokerMessage) => (result: any) =>
       message.respond(
         stringCodec.encode(
@@ -110,16 +103,6 @@ export const internalRegistrar =
         ),
       )
     })
-
-    setInterval(() => {
-      publish(BROKER_INTERNAL_SUBJECT, {
-        event: 'telegram/sendMessage',
-        payload: {
-          target: 1115872701,
-          text: 'hi',
-        },
-      } as BrokerRequestPayload)
-    }, 1000)
 
     await (async () => {
       for await (const message of internalSubscription) {
