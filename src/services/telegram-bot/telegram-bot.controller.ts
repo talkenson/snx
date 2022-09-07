@@ -24,19 +24,12 @@ export const registerTelegramBotController: Controller<
       },
       (resolve, reject, context) =>
         async ({ target, text }) => {
-          const message = await sendMessage(target, text)
-          makeRequest({
-            event: 'authentication/getAccountId',
-            payload: {
-              origin: AccountOrigin.Telegram,
-              externalId: message.chat.id,
-            },
-          })
+          sendMessage(target, text)
             .then(result => {
-              return resolve({ message, result })
+              return resolve(result)
             })
             .catch(e => {
-              return reject({ message, error: e })
+              return reject({ error: e })
             })
         },
     )

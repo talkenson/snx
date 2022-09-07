@@ -252,6 +252,7 @@ export const registerAuthenticateController = createController({
         eventName: 'getAccountId',
         description: 'get account id by credentials',
         requireAuth: false,
+        transports: ['broker'],
       },
       (resolve, reject, context) =>
         async ({ origin, externalId }) => {

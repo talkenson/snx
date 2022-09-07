@@ -52,7 +52,7 @@ export const restRegistrar =
         graphBase.push({
           scope: scope,
           action: eventName,
-          transports: metadata.transports || controllerTransport || ['ws'],
+          transports: metadata.transports || controllerTransport || ['broker'],
           schema: metadata.schema,
           authRequired: authFlag,
           description: metadata.description,
