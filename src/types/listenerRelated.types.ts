@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { BrokerDrivenListenerFunction } from '@/transporters/broker/types'
 import {
   RestDrivenListenerFunction,
   RestMethod,
@@ -31,7 +30,6 @@ export type ListenerFunction<Props = any> = (
 type AnySourceDrivenListenerFunction =
   | EventDrivenListenerFunction
   | RestDrivenListenerFunction
-  | BrokerDrivenListenerFunction
 
 export type ListenerWrapperOptions<T extends AnySourceDrivenListenerFunction> =
   T extends RestDrivenListenerFunction

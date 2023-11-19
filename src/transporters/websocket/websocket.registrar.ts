@@ -18,7 +18,7 @@ import { RegistrarInjection } from '@/types/registrar.types'
 import { exists } from '@/utils/exists'
 
 export const websocketRegistrar =
-  ({ prisma, makeRequest }: RegistrarInjection): EventControllerRegistrar =>
+  ({ prisma, bus }: RegistrarInjection): EventControllerRegistrar =>
   (io: Server, socket: Socket, { userId, clientId }) =>
   async (controllers: Controller[]) => {
     const eventListenerMap: EventListenerMap = new Map()
@@ -109,7 +109,7 @@ export const websocketRegistrar =
         }
       }
 
-    await controllers.forEach(controller => {
+    controllers.forEach(controller => {
       controller.register(
         addListener(
           controller.scope,
@@ -117,7 +117,7 @@ export const websocketRegistrar =
           controller.transport,
         ),
         controller.repository ? controller.repository({ prisma }) : undefined,
-        makeRequest,
+        bus,
       )
     })
 

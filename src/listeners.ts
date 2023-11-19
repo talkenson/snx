@@ -12,7 +12,7 @@ import { registerSchemaController } from '@/services/schema/schema.controller'
 import { registerSparkController } from '@/services/spark/spark.controller'
 import { registerTelegramBotController } from '@/services/telegram-bot/telegram-bot.controller'
 import { justLog } from '@/utils/justLog'
-import { createNATSConnection } from '@/base/brokerService'
+import mitt from 'mitt'
 
 justLog.info('Creating registration handles...')
 
@@ -29,12 +29,12 @@ export const { registerAllEventControllers, registerAllRestControllers } =
       registerFilesController,
       registerSchemaController,
       registerMetricsController,
-      registerTelegramBotController,
+      // registerTelegramBotController,
     ],
     {
       prisma: prisma,
       ws: { io: ioServer },
       rest: { router },
-      broker: { initializer: createNATSConnection },
+      internal: { bus: mitt() },
     },
   )([])

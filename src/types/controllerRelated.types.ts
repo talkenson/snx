@@ -1,13 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { Router } from 'express'
 import { Server } from 'socket.io'
+import { Emitter } from 'mitt'
 import { Account } from '@/domain/account'
-import { Profile } from '@/domain/profile'
-import {
-  BrokerExported,
-  BrokerMakeRequest,
-  BrokerSubscription,
-} from '@/transporters/broker/types'
 import { PokeTransport } from '@/types/PokeTransport'
 import { AddListenerFunction } from '@/types/listenerRelated.types'
 
@@ -21,12 +16,14 @@ export type ControllerContext<
   clientId: string
 } & T
 
+export type EventBus = Emitter<Record<string, unknown>>
+
 export type InvalidationFunction = () => void
 
 export type ControllerRegisterer<RepositoryType> = (
   addListener: AddListenerFunction,
   repository: RepositoryType,
-  makeRequest: BrokerMakeRequest,
+  bus: EventBus,
 ) => InvalidationFunction | void
 
 export type ControllerSetup<RepositoryType> = (
@@ -53,8 +50,8 @@ export type RegistrarTypedParameterSet<T extends PokeTransport> = T extends 'ws'
   ? { io: Server }
   : T extends 'rest'
   ? { router: Router }
-  : T extends 'broker'
-  ? { initializer: () => Promise<BrokerExported> }
+  : T extends 'internal'
+  ? { bus: EventBus }
   : never
 
 export type ControllerRegistrarParameters = {

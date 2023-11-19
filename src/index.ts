@@ -9,7 +9,6 @@ import { authenticationExpressMiddleware } from '@/utils/authentication/authenti
 import { callbackCollection } from '@/utils/beforeExitHook'
 import { justLog } from '@/utils/justLog'
 import mainStore from '@/common/stores/main.store'
-import { nanoid } from 'nanoid'
 import { DateTime } from 'luxon'
 import { GENERATED_INSTANCE_ID } from '@/config/server'
 const PORT = parseInt(import.meta.env.VITE_PORT || '3071')

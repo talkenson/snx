@@ -1,1 +1,1 @@
-export type PokeTransport = 'ws' | 'rest' | 'broker'
+export type PokeTransport = 'ws' | 'rest' | 'internal'

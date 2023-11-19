@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { BrokerMakeRequest } from '@/transporters/broker/types'
+import { EventBus } from '@/types/controllerRelated.types'
 
 export type RegistrarInjection = {
   prisma: PrismaClient
-  makeRequest: BrokerMakeRequest
+  bus: EventBus
 }
